@@ -24,7 +24,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    screen.fill((red))
+    screen.fill(red)
     screen.blit(bg,(0, 0))
 
     # Update the display
