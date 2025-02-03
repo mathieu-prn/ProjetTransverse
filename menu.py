@@ -8,7 +8,7 @@ WIDTH = 1000
 HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Menu")
-bg = pygame.image.load("Background.png")
+bg = pygame.image.load("assets/Background.png")
 
 # Initialize Colors
 red=(255,0,0)
