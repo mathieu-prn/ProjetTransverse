@@ -29,7 +29,7 @@ while running:
             if event.key== pygame.K_f:
                 fullscreen=not fullscreen
                 if fullscreen:
-                    screen=pygame.display.set_mode((WIDTH,HEIGHT),pygame.FULLSCREEN)
+                    screen=pygame.display.set_mode((0,0),pygame.FULLSCREEN)
                 else:
                     screen=pygame.display.set_mode((WIDTH, HEIGHT))
     screen.fill(blue)
