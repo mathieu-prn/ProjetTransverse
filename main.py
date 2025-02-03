@@ -4,10 +4,12 @@ import pygame
 print(pygame.init())
 
 # Set up the game window
-WIDTH = 1500
+WIDTH = 1400
 HEIGHT = 700
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport")
+pygame_icon = pygame.image.load('logo.png')
+pygame.display.set_icon(pygame_icon)
 
 # Initialize Colors
 red=(255,0,0)
