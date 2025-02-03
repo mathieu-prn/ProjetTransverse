@@ -8,7 +8,7 @@ WIDTH = 1400
 HEIGHT = 700
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport")
-pygame_icon = pygame.image.load('logo.png')
+pygame_icon = pygame.image.load('assets/logo.png')
 pygame.display.set_icon(pygame_icon)
 
 # Initialize Colors
