@@ -24,8 +24,15 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    screen.fill(red)
+    screen.fill((240,240,240, 0.5))
     screen.blit(bg,(0, 0))
+    logo_long = pygame.image.load("assets/Logo long EFREI sport.png")
+    screen.blit(logo_long, (345, 32))
+
+    pygame.draw.line(screen, blue_efrei, (0,172), (1000,172), width=16)
+    pygame.draw.line(screen, blue_efrei, (0, 172+32), (1000, 172+32), width=16)
+    pygame.draw.rect(screen,(201,201,201),(0,330,1000,176))
+
 
     # Update the display
     pygame.display.flip()
