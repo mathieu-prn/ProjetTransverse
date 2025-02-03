@@ -1,7 +1,7 @@
 import pygame
 
 # Initialize Pygame
-print(pygame.init())
+pygame.init()
 
 # Set up the game window
 WIDTH = 1000

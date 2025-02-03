@@ -54,6 +54,5 @@ while running:
 
     # Set the frame rate
     clock.tick(60)
-
 # Quit the game
 pygame.quit()
