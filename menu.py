@@ -13,7 +13,7 @@ bg = pygame.image.load("Background.png")
 # Initialize Colors
 red=(255,0,0)
 green=(0,255,0)
-blue_efrei=(18,121,190)
+blue_efrei=(255,255,255)
 
 
 clock = pygame.time.Clock()
@@ -24,7 +24,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    screen.fill((red))
+    screen.fill((blue_efrei))
     screen.blit(bg,(0, 0))
 
     # Update the display
