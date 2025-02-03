@@ -7,14 +7,16 @@ print(pygame.init())
 WIDTH = 1000
 HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("EfreiSport - Menu")
-bg = pygame.image.load("assets/Background.png")
+pygame.display.set_caption("Dino")
 
-# Initialize Colors
-red=(255,0,0)
-green=(0,255,0)
-blue_efrei=(18,121,190)
+# Define colors
+white = (255, 255, 255)
+black = (0, 0, 0)
 
+# Define game objects
+circleX = 75
+circleY = 75
+radius = 5
 
 clock = pygame.time.Clock()
 
@@ -24,8 +26,12 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    screen.fill(red)
-    screen.blit(bg,(0, 0))
+
+    # Clear the screen
+    screen.fill(white)
+
+    # Draw game objects
+    pygame.draw.circle(screen,black,(circleX,circleY),radius)
 
     # Update the display
     pygame.display.flip()
