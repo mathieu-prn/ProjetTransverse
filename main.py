@@ -12,9 +12,7 @@ pygame_icon = pygame.image.load('logo.png')
 pygame.display.set_icon(pygame_icon)
 
 # Initialize Colors
-red=(255,0,0)
-green=(0,255,0)
-blue=(0,0,255)
+color_of_the_back=(182,32,219)
 
 
 clock = pygame.time.Clock()
@@ -32,7 +30,7 @@ while running:
                     screen=pygame.display.set_mode((0,0),pygame.FULLSCREEN)
                 else:
                     screen=pygame.display.set_mode((WIDTH, HEIGHT))
-    screen.fill(blue)
+    screen.fill(color_of_the_back)
 
     # Update the display
     pygame.display.flip()
