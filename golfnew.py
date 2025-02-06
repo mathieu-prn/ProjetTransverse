@@ -44,6 +44,9 @@ class Slider(pygame.sprite.Sprite):
         pygame.draw.rect(screen, blue_efrei, self.rect.inflate(6, 6))
         pygame.draw.rect(screen, white, self.rect)
         pygame.draw.rect(screen, black, pygame.Rect(self.X, self.Y, 30, 5))
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Value: {slider.get_value()}", True, blue_efrei)
+        screen.blit(text, (10, 10))
 
     def handle_event(self, event):
         """Handles mouse events to move the slider."""
@@ -162,19 +165,21 @@ button=Launch()
 arrow=Arrow()
 flag=Flag()
 hole=Hole()
-# Game loop
+
+# Game loop --> repeats until we leave the game
 running = True
 while running:
+    # events --> The first one closes the game if we quit
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # custom events
+        #custom events --> add it as methods of classes and call the methods here, it will run each method each loop of the game and each method will check for what it needs to run
         slider.handle_event(event)
         arrow.follow_mouse()
         button.clicked(event)
 
 
-    #loop
+    #loop --> every action
     screen.fill(white)
     field.draw(screen)
     ball.draw(screen)
@@ -188,10 +193,10 @@ while running:
     text = font.render(f"Value: {slider.get_value()}", True, blue_efrei)
     screen.blit(text, (10, 10))
 
-    # Update the display
+    # Update the display --> Update the new display with the new objects and positions
     pygame.display.flip()
 
-    # Set the frame rate
+    # Set the frame rate --> Don't change
     clock.tick(60)
 
 # Quit the game
