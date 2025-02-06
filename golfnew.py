@@ -15,6 +15,7 @@ black = (0, 0, 0)
 white = (255, 255, 255)
 red=(255,0,0)
 blue_efrei=(18,121,190)
+grey=(211,211,211)
 
 
 clock = pygame.time.Clock()
@@ -68,13 +69,21 @@ class Launch(pygame.sprite.Sprite):
         self.y=396
         self.width=50
         self.height=80
+        self.color= white
         self.rect=pygame.Rect(self.x, self.y, self.width, self.height)
     def draw(self,screen):
         pygame.draw.rect(screen, blue_efrei, self.rect.inflate(6, 6))
-        pygame.draw.rect(screen, white, self.rect)
+        pygame.draw.rect(screen, self.color, self.rect)
         font = pygame.font.Font(None, 45)
         text = font.render(f"Go!", True, blue_efrei)
         screen.blit(text, (self.x, self.y+30))
+    def clicked(self,event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                self.color= grey
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.color= white
+
 
 class Field(pygame.sprite.Sprite):
     def __init__(self):
@@ -126,6 +135,24 @@ class Arrow(pygame.sprite.Sprite):
     def validate_position(self,event):
         pass
 
+class Flag(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image=pygame.image.load("assets/Flag.png")
+        self.rect=self.image.get_rect()
+        self.pos=(891,192.5)
+    def draw(self, surface):
+        surface.blit(self.image, self.pos)
+
+class Hole(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image=pygame.image.load("assets/Hole.png")
+        self.rect = self.image.get_rect()
+        self.rect.center = (900, 267.5)
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
 
 #Create objects
 ball=Ball()
@@ -133,15 +160,19 @@ slider=Slider()
 field=Field()
 button=Launch()
 arrow=Arrow()
+flag=Flag()
+hole=Hole()
 # Game loop
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        # custom events
         slider.handle_event(event)
         arrow.follow_mouse()
-    #events
+        button.clicked(event)
+
 
     #loop
     screen.fill(white)
@@ -150,6 +181,8 @@ while running:
     slider.draw()
     button.draw(screen)
     arrow.draw(screen)
+    flag.draw(screen)
+    hole.draw(screen)
 
     font = pygame.font.Font(None, 36)
     text = font.render(f"Value: {slider.get_value()}", True, blue_efrei)
