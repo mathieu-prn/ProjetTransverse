@@ -171,6 +171,7 @@ flag=Flag()
 hole=Hole()
 mouse_pressed = False
 follow = True
+
 # Game loop --> repeats until we leave the game
 running = True
 while running:
@@ -199,10 +200,6 @@ while running:
     arrow.draw(screen)
     flag.draw(screen)
     hole.draw(screen)
-
-    font = pygame.font.Font(None, 36)
-    text = font.render(f"Value: {slider.get_value()}", True, blue_efrei)
-    screen.blit(text, (10, 10))
 
     # Update the display --> Update the new display with the new objects and positions
     pygame.display.flip()
