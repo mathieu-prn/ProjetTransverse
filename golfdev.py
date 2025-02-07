@@ -218,10 +218,6 @@ while running:
             slider.handle_event(event)
             button.clicked(event)
 
-
-
-
-
     #loop --> every action
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg,(0,0))
