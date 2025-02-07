@@ -117,26 +117,30 @@ class Arrow(pygame.sprite.Sprite):
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
-    def follow_mouse(self):
+    def follow_mouse(self,follow):
+        if follow:
+
         # Get mouse position
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+            mouse_x, mouse_y = pygame.mouse.get_pos()
 
         # Determine the direction of the mouse relative to the ball
-        mouse_dx = mouse_x - ball.rect.center[0]
-        mouse_dy = mouse_y - ball.rect.center[1]
-        target_angle = math.atan2(mouse_dy, mouse_dx)
+            mouse_dx = mouse_x - ball.rect.center[0]
+            mouse_dy = mouse_y - ball.rect.center[1]
+            target_angle = math.atan2(mouse_dy, mouse_dx)
 
         # Adjust the angle of the arrow based on mouse position
-        if target_angle > self.angle+0.1:
-            self.angle += self.rotation_speed
-        elif target_angle < self.angle-0.1:
-            self.angle -= self.rotation_speed
+            if target_angle > self.angle+0.1:
+                self.angle += self.rotation_speed
+            elif target_angle < self.angle-0.1:
+                self.angle -= self.rotation_speed
 
         # Calculate new position for the arrow
-        self.rect.center = (ball.rect.center[0] + 40 * math.cos(self.angle),ball.rect.center[1] + 40 * math.sin(self.angle))
+            self.rect.center = (ball.rect.center[0] + 40 * math.cos(self.angle),ball.rect.center[1] + 40 * math.sin(self.angle))
 
-    def validate_position(self,event):
-        pass
+    def validate_position(self,event,follow):
+        if pygame.mouse.get_pressed()[0]:
+            return True
+
 
 class Flag(pygame.sprite.Sprite):
     def __init__(self):
@@ -165,7 +169,8 @@ button=Launch()
 arrow=Arrow()
 flag=Flag()
 hole=Hole()
-
+mouse_pressed = False
+follow = True
 # Game loop --> repeats until we leave the game
 running = True
 while running:
@@ -175,8 +180,13 @@ while running:
             running = False
         #custom events --> add it as methods of classes and call the methods here, it will run each method each loop of the game and each method will check for what it needs to run
         slider.handle_event(event)
-        arrow.follow_mouse()
+        arrow.follow_mouse(follow)
+        if arrow.validate_position(event,follow):
+            follow = False
         button.clicked(event)
+
+
+
 
 
     #loop --> every action
