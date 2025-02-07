@@ -31,7 +31,7 @@ class Ball(pygame.sprite.Sprite):
         img = pygame.image.load("assets/GolfBall.png")
         self.image = pygame.transform.scale(img, (15, 15))
         self.rect = self.image.get_rect()
-        self.rect.center = (110, 267.5)
+        self.rect.center = (getrelativepos((25,212.5)))
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -91,7 +91,6 @@ class Launch(pygame.sprite.Sprite):
                 self.color= grey
         elif event.type == pygame.MOUSEBUTTONUP:
             self.color= white
-
 
 class Field(pygame.sprite.Sprite):
     def __init__(self):
@@ -154,7 +153,6 @@ class Arrow(pygame.sprite.Sprite):
                     print("follow True")
                     return True
 
-
 class Flag(pygame.sprite.Sprite):
     def __init__(self,pos):
         pygame.sprite.Sprite.__init__(self)
@@ -164,6 +162,11 @@ class Flag(pygame.sprite.Sprite):
         self.pos=(self.x-7,self.y-75)
     def draw(self, surface):
         surface.blit(self.image, self.pos)
+    def checkhide(self):
+        x, y = ball.rect.center
+        if self.x-x<50 and self.y-y<50:
+            return True
+        return False
 
 class Hole(pygame.sprite.Sprite):
     def __init__(self,pos):
@@ -183,7 +186,8 @@ class Level(pygame.sprite.Sprite):
         self.flag=Flag(getrelativepos(hole_pos))
     def load(self,screen):
         self.hole.draw(screen)
-        self.flag.draw(screen)
+        if not self.flag.checkhide():
+            self.flag.draw(screen)
         for wall in self.walls:
             wall.draw(screen)
 
@@ -227,10 +231,7 @@ while running:
     button.draw(screen)
     arrow.draw(screen)
 
-    #Load Levels
     Level0.load(screen)
-
-
 
     # Update the display --> Update the new display with the new objects and positions
     pygame.display.flip()
