@@ -138,7 +138,7 @@ class Arrow(pygame.sprite.Sprite):
             self.rect.center = (ball.rect.center[0] + 40 * math.cos(self.angle),ball.rect.center[1] + 40 * math.sin(self.angle))
 
     def validate_position(self,event,follow):
-        if pygame.mouse.get_pressed()[0]:
+        if event.type == 1026:
             return True
 
 
@@ -179,11 +179,12 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         #custom events --> add it as methods of classes and call the methods here, it will run each method each loop of the game and each method will check for what it needs to run
-        slider.handle_event(event)
         arrow.follow_mouse(follow)
         if arrow.validate_position(event,follow):
             follow = False
-        button.clicked(event)
+        if not follow:
+            slider.handle_event(event)
+            button.clicked(event)
 
 
 
