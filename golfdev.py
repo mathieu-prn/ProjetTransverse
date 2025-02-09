@@ -1,5 +1,4 @@
-import pygame, sys, math
-from pygame.locals import *
+import pygame, json, math
 
 # Initialize Pygame
 pygame.init()
@@ -17,24 +16,42 @@ white = (255, 255, 255)
 red=(255,0,0)
 blue_efrei=(18,121,190)
 grey=(211,211,211)
-
-
-clock = pygame.time.Clock()
+green=(148,186,134)
 
 def getrelativepos(pos):
+    '''Returns the relative position to the field: (0,0) is the top left corner'''
     x,y=pos
-    return (x+80,y+55)
+    return x+80,y+55
+
+def getlevel():
+    '''Reads the level number saved in the saves file and returns it'''
+    filename="saves/golflevel.json"
+    dico=loadfile(filename)
+    for key,value in dico.items():
+        if key=="level":
+            print("Returned level:",value)
+            return value
+
+def loadfile(file):
+    '''Loads json files'''
+    return json.load(open(file))
+
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/GolfBall.png")
+        img = pygame.image.load("assets/Golf/GolfBall.png")
         self.image = pygame.transform.scale(img, (15, 15))
         self.rect = self.image.get_rect()
-        self.rect.center = (getrelativepos((25,212.5)))
+        self.rect.center = getrelativepos((25,212.5))
 
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
+    def draw(self):
+        screen.blit(self.image, self.rect)
+
+    def collision(self,walls):
+        for wall in walls:
+            if pygame.Rect.colliderect(self.rect,wall.rect):
+                return wall
 
 class Slider(pygame.sprite.Sprite):
     def __init__(self):
@@ -79,7 +96,7 @@ class Launch(pygame.sprite.Sprite):
         self.height=80
         self.color= white
         self.rect=pygame.Rect(self.x, self.y, self.width, self.height)
-    def draw(self,screen):
+    def draw(self):
         pygame.draw.rect(screen, blue_efrei, self.rect.inflate(6, 6))
         pygame.draw.rect(screen, self.color, self.rect)
         font = pygame.font.Font(None, 45)
@@ -95,35 +112,39 @@ class Launch(pygame.sprite.Sprite):
 class Field(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image=pygame.image.load("assets/GolfField.png")
         self.rect=pygame.Rect(80,55,900,425)
-        self.pos=(80,55)
-    def draw(self, surface):
-        surface.blit(self.image, self.pos)
+    def draw(self):
+        pygame.draw.rect(screen, green, self.rect)
 
 class Wall(pygame.sprite.Sprite):
-    def __init__(self,relative_x,relative_y,width,height):
+    def __init__(self,relative_x,relative_y,width,height,walls,isborder):
         pygame.sprite.Sprite.__init__(self)
         self.color=blue_efrei
         self.x=relative_x
         self.y=relative_y
         self.width=width
         self.height=height
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, pygame.Rect(self.x+80-self.width/2, self.y+55-self.height/2, self.width, self.height))
+        #If it's a border, set the left corner position. If it's a wall set the center position.
+        if isborder:
+            self.rect=pygame.Rect(self.x+80, self.y+55, self.width, self.height)
+        else:
+            self.rect=pygame.Rect(self.x+80-self.width/2, self.y+55-self.height/2, self.width, self.height)
+        walls.append(self) #add the new wall to the walls list --> It will be useful for collisions
+    def draw(self):
+        pygame.draw.rect(screen, self.color, self.rect)
 
 class Arrow(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/GolfBall.png")
+        img = pygame.image.load("assets/Golf/GolfBall.png")
         self.image = pygame.transform.scale(img, (15, 15))
         self.rect = self.image.get_rect()
         self.rect.center = (int(ball.rect.center[0]) + 40, 267.5)
         self.angle = 0
         self.rotation_speed = 0.1
 
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
+    def draw(self):
+        screen.blit(self.image, self.rect)
 
     def follow_mouse(self,follow):
         if follow:
@@ -156,54 +177,65 @@ class Arrow(pygame.sprite.Sprite):
 class Flag(pygame.sprite.Sprite):
     def __init__(self,pos):
         pygame.sprite.Sprite.__init__(self)
-        self.image=pygame.image.load("assets/Flag.png")
+        self.image=pygame.image.load("assets/Golf/Flag.png")
         self.rect=self.image.get_rect()
         self.x,self.y=pos
         self.pos=(self.x-7,self.y-75)
-    def draw(self, surface):
-        surface.blit(self.image, self.pos)
-    def checkhide(self):
-        x, y = ball.rect.center
-        if self.x-x<50 and self.y-y<50:
-            return True
-        return False
+    def draw(self):
+        screen.blit(self.image, self.pos)
 
 class Hole(pygame.sprite.Sprite):
     def __init__(self,pos):
         pygame.sprite.Sprite.__init__(self)
-        self.image=pygame.image.load("assets/Hole.png")
+        self.image=pygame.image.load("assets/Golf/Hole.png")
         self.rect = self.image.get_rect()
         self.rect.center = pos
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
+    def draw(self):
+        screen.blit(self.image, self.rect)
 
 class Level(pygame.sprite.Sprite):
-    def __init__(self,number,walls,hole_pos):
+    def __init__(self,number,hole_pos):
         pygame.sprite.Sprite.__init__(self)
         self.number=number
-        self.walls=walls
         self.hole=Hole(getrelativepos(hole_pos))
         self.flag=Flag(getrelativepos(hole_pos))
-    def load(self,screen):
-        self.hole.draw(screen)
-        if not self.flag.checkhide():
-            self.flag.draw(screen)
-        for wall in self.walls:
-            wall.draw(screen)
+    def load(self):
+        self.hole.draw()
+        self.flag.draw()
+        #Load the right level depending on the level number
+        match self.number:
+            case 1:
+                wall1=Wall(750,212.5,6,200,walls,False)
+            case 2:
+                wall1=Wall(150,212.5,6,200,walls,False)
+                wall2 = Wall(750, 212.5, 6, 200, walls, False)
+            case _:
+                pass
+        #draw walls
+        for wall in walls:
+            wall.draw()
+
+#Create field
+field=Field()
+walls=[]
+bordertop=Wall(0,0,900,6,walls,True)
+borderleft=Wall(0,0,6,425,walls,True)
+borderbottom=Wall(0,425,900,6,walls,True)
+borderright=Wall(900,0,6,431,walls,True)
 
 #Create objects
 ball=Ball()
 slider=Slider()
-field=Field()
 button=Launch()
 arrow=Arrow()
 mouse_pressed = False
 follow = True
 
 #Levels
-Level0=Level(0,[],(850,212.5))
+level=Level(getlevel(),(850,212.5)) #set the initial level
 
 # Game loop --> repeats until we leave the game
+clock = pygame.time.Clock()
 running = True
 while running:
     # events --> The first one closes the game if we quit
@@ -223,15 +255,24 @@ while running:
             button.clicked(event)
 
     #loop --> every action
+    #bg
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg,(0,0))
-    field.draw(screen)
-    ball.draw(screen)
-    slider.draw()
-    button.draw(screen)
-    arrow.draw(screen)
 
-    Level0.load(screen)
+    #field
+    field.draw()
+
+    #Objects
+    ball.draw()
+    slider.draw()
+    button.draw()
+    arrow.draw()
+
+    #Load Level
+    level.load()
+
+    #check for collisions
+    ball.collision(walls)
 
     # Update the display --> Update the new display with the new objects and positions
     pygame.display.flip()

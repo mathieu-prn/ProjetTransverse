@@ -23,7 +23,7 @@ clock = pygame.time.Clock()
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/GolfBall.png")
+        img = pygame.image.load("assets/Golf/GolfBall.png")
         self.image = pygame.transform.scale(img, (15, 15))
         self.rect = self.image.get_rect()
         self.rect.center = (110, 267.5)
@@ -107,7 +107,7 @@ class Wall(pygame.sprite.Sprite):
 class Arrow(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/GolfBall.png")
+        img = pygame.image.load("assets/Golf/GolfBall.png")
         self.image = pygame.transform.scale(img, (15, 15))
         self.rect = self.image.get_rect()
         self.rect.center = (int(ball.rect.center[0]) + 40, 267.5)
@@ -145,7 +145,7 @@ class Arrow(pygame.sprite.Sprite):
 class Flag(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image=pygame.image.load("assets/Flag.png")
+        self.image=pygame.image.load("assets/Golf/Flag.png")
         self.rect=self.image.get_rect()
         self.pos=(891,192.5)
     def draw(self, surface):
@@ -154,7 +154,7 @@ class Flag(pygame.sprite.Sprite):
 class Hole(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image=pygame.image.load("assets/Hole.png")
+        self.image=pygame.image.load("assets/Golf/Hole.png")
         self.rect = self.image.get_rect()
         self.rect.center = (900, 267.5)
     def draw(self, surface):
