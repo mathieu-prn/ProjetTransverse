@@ -47,10 +47,43 @@ class Ball(pygame.sprite.Sprite):
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
+#Create the basic rectangle used in the Hoop
+class Hoop():
+    def __init__(self, x, y, width, height, color,border_radius=0):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.color = color
+        self.border_radius = border_radius
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.height),border_radius=self.border_radius)
+
+#Associate all the different rectangles of the Hoop
+class Scene:
+    def __init__(self):
+        self.objects = []
+
+    def add_object(self, obj):
+        self.objects.append(obj)
+
+    def draw(self, surface):
+        for obj in self.objects:
+            obj.draw(surface)
+
+#Create the different parts of the Hoop
+ring = Hoop(875,200,110,10,blue_efrei,10)
+backboard = Hoop(975, 100 , 20 , 150,blue_efrei,0)
+
+# Create the scene and add the rectangles
+scene = Scene()
+scene.add_object(ring)
+scene.add_object(backboard)
+
 
 #Object initialization
 ball = Ball()
-
 calc_eq = True
 
 # Game loop
@@ -72,10 +105,10 @@ while running:
         ball.rect.center = ball.calc_pos(x_coeff, y_coeff, t)
 
     ball.draw(screen)
+    scene.draw(screen)
     # Update the display
     pygame.display.flip()
     t+=dt
-
     # Set the frame rate
     clock.tick(60)
 
