@@ -1,7 +1,7 @@
 import pygame
 
 # Initialize Pygame
-pygame.init()
+print(pygame.init())
 
 # Set up the game window
 WIDTH = 1000
@@ -34,6 +34,11 @@ while running:
     pygame.draw.rect(screen,(201,201,201),(0,330,1000,176))
 
 
+    pygame.draw.rect(screen,(blue_efrei),(90,360,348,98 ),0,48)
+    pygame.draw.rect(screen, ((255, 255, 255)), (90+6, 360+6, 348-12, 98-12), 0, 48)
+
+    pygame.draw.rect(screen, (blue_efrei), (564, 360, 348, 98), 0, 48)
+    pygame.draw.rect(screen, ((255, 255, 255)), (564 + 6, 360 + 6, 348 - 12, 98 - 12), 0, 48)
     # Update the display
     pygame.display.flip()
 
