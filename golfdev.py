@@ -41,7 +41,6 @@ def updatelevel(levelnumber):
                 json.dump(dico,file)
             level.number=levelnumber
 
-
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -49,19 +48,40 @@ class Ball(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(img, (15, 15))
         self.rect = self.image.get_rect()
         self.rect.center = getrelativepos((25,212.5))
+        self.velocity=0
+        self.angle=0
 
     def draw(self):
         screen.blit(self.image, self.rect)
 
     def collision(self,walls):
         for wall in walls:
-            if pygame.Rect.colliderect(self.rect,wall.rect):
-                return wall
+            if pygame.Rect.colliderect(pygame.Rect(self.rect.inflate(5,5)),wall.rect):
+                print("collided with", wall)
+                if wall.rect[2]==6:
+                    self.angle = math.pi - self.angle  # Reflect across the Y-axis
+                elif wall.rect[3]==6:
+                    self.angle = -self.angle
+                self.velocity *= 0.9  # Optional: Reduce velocity slightly to simulate energy loss
+                return True
 
     def checkwin(self):
-        if pygame.Rect.colliderect(self.rect, level.hole.collisionrect):
+        if pygame.Rect.colliderect(self.rect, level.hole.collisionrect) and self.velocity<10:
             return True
 
+    def updateposition(self,launched):
+        if launched:
+            self.velocity=slider.get_value()*0.4
+            self.angle = arrow.angle
+        acceleration=-0.7
+        vx=self.velocity*math.cos(self.angle)
+        vy=self.velocity*math.sin(self.angle)
+        x,y=self.rect.center
+        self.rect.center=(x+vx,y+vy)
+        self.velocity+=acceleration
+
+        if self.velocity < 0:
+            self.velocity = 0
 
 class Slider(pygame.sprite.Sprite):
     def __init__(self):
@@ -118,7 +138,7 @@ class Launch(pygame.sprite.Sprite):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 self.color= grey
-                ball.rect.center=getrelativepos((836,212.5))
+                ball.updateposition(True)
         elif event.type == pygame.MOUSEBUTTONUP:
             self.color= white
 
@@ -147,45 +167,35 @@ class Wall(pygame.sprite.Sprite):
         pygame.draw.rect(screen, self.color, self.rect)
 
 class Arrow(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, length=50):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/Golf/GolfBall.png")
-        self.image = pygame.transform.scale(img, (15, 15))
-        self.rect = self.image.get_rect()
-        self.rect.center = (int(ball.rect.center[0]) + 40, 267.5)
-        self.angle = 0
-        self.rotation_speed = 0.1
+        self.length = length  # Default arrow length
+        self.direction = pygame.Vector2(1, 0)  # Default direction (to the right)
 
     def draw(self):
-        screen.blit(self.image, self.rect)
+        """Draws the arrow based on the last updated direction."""
+        arrow_end = ball.rect.center + self.direction * (20+slider.get_value())
+        pygame.draw.line(screen, blue_efrei, ball.rect.center, arrow_end, 3)
 
-    def follow_mouse(self,follow):
-        if follow:
+        # Arrowhead calculation
+        self.angle = math.atan2(self.direction.y, self.direction.x)
+        self.arrowangle = math.atan2(-self.direction.y, -self.direction.x)
+        arrow_size = 10
+        left = (arrow_end.x + arrow_size * math.cos(self.arrowangle + math.pi / 6),
+                arrow_end.y + arrow_size * math.sin(self.arrowangle + math.pi / 6))
+        right = (arrow_end.x + arrow_size * math.cos(self.arrowangle - math.pi / 6),
+                 arrow_end.y + arrow_size * math.sin(self.arrowangle - math.pi / 6))
+        pygame.draw.polygon(screen, blue_efrei, [arrow_end, left, right])
 
-        # Get mouse position
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-
-        # Determine the direction of the mouse relative to the ball
-            mouse_dx = mouse_x - ball.rect.center[0]
-            mouse_dy = mouse_y - ball.rect.center[1]
-            target_angle = math.atan2(mouse_dy, mouse_dx)
-
-        # Adjust the angle of the arrow based on mouse position
-            if target_angle > self.angle+0.1:
-                self.angle += self.rotation_speed
-            elif target_angle < self.angle-0.1:
-                self.angle -= self.rotation_speed
-
-        # Calculate new position for the arrow
-            self.rect.center = (ball.rect.center[0] + 40 * math.cos(self.angle),ball.rect.center[1] + 40 * math.sin(self.angle))
+    def update_direction(self, mouse_pos):
+        """Updates the arrow direction unless it's locked."""
+        if not self.validate_position(follow):  # Check if following is allowed
+            direction = pygame.Vector2(mouse_pos) - ball.rect.center
+            if direction.length() > 0:
+                self.direction = direction.normalize()  # Store direction
 
     def validate_position(self,follow):
-                if follow:
-                    print("follow False")
-                    return False
-                else:
-                    print("follow True")
-                    return True
+                return not follow
 
 class Flag(pygame.sprite.Sprite):
     def __init__(self,pos):
@@ -209,28 +219,38 @@ class Hole(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 class Level(pygame.sprite.Sprite):
-    def __init__(self,number,hole_pos):
+    def __init__(self,number):
         pygame.sprite.Sprite.__init__(self)
         self.number=number
-        self.hole=Hole(getrelativepos(hole_pos))
-        self.flag=Flag(getrelativepos(hole_pos))
+        self.hole=Hole(getrelativepos((850,212.5)))
+        self.flag=Flag(getrelativepos((850,212.5)))
 
-    def load(self):
-        self.hole.draw()
-        self.flag.draw()
+    def draw(self):
         #Load the right level depending on the level number
-        print("Loaded level",self.number)
         match self.number:
-            case 1:
+            case 1: #Level 1
                 wall1=Wall(750,212.5,6,200,walls,False)
-            case 2:
+            case 2: #Level 2
                 wall1=Wall(150,212.5,6,200,walls,False)
                 wall2 = Wall(750, 212.5, 6, 200, walls, False)
+            case 3: #And so on
+                self.hole=Hole(getrelativepos((850,50)))
+                self.flag=Flag(getrelativepos((850,50)))
+                wall1=Wall(750,150,6,300,walls,False)
+                wall2=Wall(150,275,6,300,walls,False)
+            case 4:
+                self.hole = Hole(getrelativepos((850, 50)))
+                self.flag = Flag(getrelativepos((850, 50)))
+                wall1 = Wall(750, 150, 6, 300, walls, False)
+                wall2 = Wall(150, 275, 6, 300, walls, False)
+                wall3 = Wall(450, 212.5, 6, 300, walls, False)
             case _:
                 pass
         #draw walls
         for wall in walls:
             wall.draw()
+        self.hole.draw()
+        self.flag.draw()
 
 #Create field
 field=Field()
@@ -249,7 +269,7 @@ mouse_pressed = False
 follow = True
 
 #Level
-level=Level(getlevel(),(850,212.5)) #set the initial level
+level=Level(getlevel()) #set the initial level
 
 # Game loop --> repeats until we leave the game
 clock = pygame.time.Clock()
@@ -263,7 +283,6 @@ while running:
         if follow:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 follow = arrow.validate_position(follow)
-            arrow.follow_mouse(follow)
         else:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if field.rect.collidepoint(event.pos):
@@ -280,18 +299,28 @@ while running:
     field.draw()
 
     #Objects
-    slider.draw()
+    # Get mouse position
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    # Update arrow direction if allowed
+    arrow.update_direction((mouse_x, mouse_y))
+
+    # Draw ball and arrow
     button.draw()
-    arrow.draw()
+
+    # check for collisions
+    ball.collision(walls)
+    if ball.velocity>0:
+        ball.updateposition(False)
+    else:
+        arrow.draw()
+        slider.draw()
 
     #Load Level
-    level.load()
+    level.draw()
     ball.draw()
 
-    #check for collisions
-    ball.collision(walls)
-
     if ball.checkwin():
+        ball.velocity=0
         ball.rect.center = getrelativepos((25, 212.5))
         updatelevel(level.number+1)
 
@@ -299,7 +328,7 @@ while running:
     pygame.display.flip()
 
     # Set the frame rate --> Don't change
-    clock.tick(60)
+    clock.tick(120)
 
 # Quit the game
 pygame.quit()
