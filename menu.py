@@ -12,7 +12,6 @@ bg = pygame.image.load("assets/Background.png")
 
 font = pygame.font.Font("../ProjetTransverse/assets/font.ttf", 48)
 
-
 # Initialize Colors
 red=(255,0,0)
 green=(0,255,0)
