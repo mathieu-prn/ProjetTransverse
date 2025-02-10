@@ -55,6 +55,16 @@ while running:
     txt_start = font.render("Start", True, (blue_efrei))
     screen.blit(txt_start, (676, 372))
 
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    clicked = 0
+    if (564 <= mouse_x <= 564 + 348 and 360 <= mouse_y <= 360 + 98 and clicked == 0):
+        if pygame.mouse.get_pressed()[0]:
+            clicked += 1
+            print("click")
+            screen.fill((240, 240, 240, 0.5))
+            pygame.display.flip()
+            break
+
     # Update the display
     pygame.display.flip()
 
