@@ -59,10 +59,47 @@ class Hoop(pygame.sprite.Sprite):
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
+class Wall(pygame.sprite.Sprite):
+    def __init__(self,relative_x,relative_y,width,height,isborder):
+        pygame.sprite.Sprite.__init__(self)
+        self.color=blue_efrei
+        self.x=relative_x
+        self.y=relative_y
+        self.width=width
+        self.height=height
+        #If it's a border, set the left corner position.
+        if isborder:
+            self.rect=pygame.Rect(self.x+80, self.y+55, self.width, self.height)
+    def draw(self,surface):
+        pygame.draw.rect(surface, self.color, self.rect)
+
+#Associate all the different rectangles of the Hoop
+class Scene:
+    def __init__(self):
+        self.objects = []
+
+    def add_object(self, obj):
+        self.objects.append(obj)
+
+    def draw(self, surface):
+        for obj in self.objects:
+            obj.draw(surface)
+
 #Object initialization
 ball = Ball()
 hoop = Hoop()
+bordertop=Wall(0,0,900,6,True)
+borderleft=Wall(0,0,6,425,True)
+borderbottom=Wall(0,425,900,6,True)
+borderright=Wall(900,0,6,431,True)
 calc_eq = True
+
+# Create the scene and add the walls
+scene = Scene()
+scene.add_object(bordertop)
+scene.add_object(borderleft)
+scene.add_object(borderright)
+scene.add_object(borderbottom)
 
 # Game loop
 running = True
@@ -85,6 +122,7 @@ while running:
 
     ball.draw(screen)
     hoop.draw(screen)
+    scene.draw(screen)
     # Update the display
     pygame.display.flip()
     t+=dt
