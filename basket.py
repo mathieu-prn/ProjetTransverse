@@ -21,20 +21,21 @@ grey=(211,211,211)
 G = 9.81
 dt = 1/10
 t = 0
+PI = math.pi
 
 clock = pygame.time.Clock()
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/GolfBall.png")
-        self.image = pygame.transform.scale(img, (15, 15))
+        img = pygame.image.load("assets/Basket/BasketBall.png")
+        self.image = pygame.transform.scale(img, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.center = (50, 400)
 
     def trajectory_equation(self, speed, angle, x0, y0):
-        v_x = speed * math.cos(angle)
-        v_y = speed * math.sin(angle)
+        v_x = speed * math.cos(angle * math.pi/180)
+        v_y = speed * math.sin(angle * math.pi/180)
         x = (v_x, x0)
         y = (0.5 * G, -v_y, y0)
         return x, y
@@ -47,18 +48,30 @@ class Ball(pygame.sprite.Sprite):
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
-#Create the basic rectangle used in the Hoop
-class Hoop():
-    def __init__(self, x, y, width, height, color,border_radius=0):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.color = color
-        self.border_radius = border_radius
+class Hoop(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load("assets/Basket/Panier coté mur.png")
+        self.image = pygame.transform.scale(img,(225,155))
+        self.rect = self.image.get_rect()
+        self.rect.center = (925,200)
 
     def draw(self, surface):
-        pygame.draw.rect(surface, self.color, (self.x, self.y, self.width, self.height),border_radius=self.border_radius)
+        surface.blit(self.image, self.rect)
+
+class Wall(pygame.sprite.Sprite):
+    def __init__(self,relative_x,relative_y,width,height,isborder):
+        pygame.sprite.Sprite.__init__(self)
+        self.color=blue_efrei
+        self.x=relative_x
+        self.y=relative_y
+        self.width=width
+        self.height=height
+        #If it's a border, set the left corner position.
+        if isborder:
+            self.rect=pygame.Rect(self.x+80, self.y+55, self.width, self.height)
+    def draw(self,surface):
+        pygame.draw.rect(surface, self.color, self.rect)
 
 #Associate all the different rectangles of the Hoop
 class Scene:
@@ -72,19 +85,21 @@ class Scene:
         for obj in self.objects:
             obj.draw(surface)
 
-#Create the different parts of the Hoop
-ring = Hoop(875,200,110,10,blue_efrei,10)
-backboard = Hoop(975, 100 , 20 , 150,blue_efrei,0)
-
-# Create the scene and add the rectangles
-scene = Scene()
-scene.add_object(ring)
-scene.add_object(backboard)
-
-
 #Object initialization
 ball = Ball()
+hoop = Hoop()
+bordertop=Wall(0,0,900,6,True)
+borderleft=Wall(0,0,6,425,True)
+borderbottom=Wall(0,425,900,6,True)
+borderright=Wall(900,0,6,431,True)
 calc_eq = True
+
+# Create the scene and add the walls
+scene = Scene()
+scene.add_object(bordertop)
+scene.add_object(borderleft)
+scene.add_object(borderright)
+scene.add_object(borderbottom)
 
 # Game loop
 running = True
@@ -93,10 +108,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    screen.fill(black)
+    screen.fill((240, 240, 240, 0.5))
+    screen.blit(bg, (0, 0))
 
     if calc_eq:
-        x_coeff, y_coeff = ball.trajectory_equation(100, 45, ball.rect.center[0], ball.rect.center[1])
+        x_coeff, y_coeff = ball.trajectory_equation(100, 40, ball.rect.center[0], ball.rect.center[1])
         print(x_coeff, x_coeff)
         calc_eq = False
 
@@ -105,6 +121,7 @@ while running:
         ball.rect.center = ball.calc_pos(x_coeff, y_coeff, t)
 
     ball.draw(screen)
+    hoop.draw(screen)
     scene.draw(screen)
     # Update the display
     pygame.display.flip()
