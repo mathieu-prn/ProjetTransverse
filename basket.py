@@ -45,20 +45,16 @@ class Ball(pygame.sprite.Sprite):
         new_y = y_coeff[0]*(time**2) + y_coeff[1]*time + y_coeff[2]
         return (new_x, new_y)
 
-    def collision(self,hoop):
-        if pygame.Rect.colliderect(self.rect,hoop.rect):
-            return True
-
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
 class Hoop(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/Basket/wall_net.png")
-        self.image = pygame.transform.scale(img,(190,156))
+        img = pygame.image.load("assets/Basket/Panier coté mur.png")
+        self.image = pygame.transform.scale(img,(225,155))
         self.rect = self.image.get_rect()
-        self.rect.center = (890,200)
+        self.rect.center = (925,200)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -76,8 +72,6 @@ class Wall(pygame.sprite.Sprite):
             self.rect=pygame.Rect(self.x+80, self.y+55, self.width, self.height)
     def draw(self,surface):
         pygame.draw.rect(surface, self.color, self.rect)
-
-rect = pygame.Rect(200, 150, 100, 100)
 
 #Associate all the different rectangles of the Hoop
 class Scene:
@@ -118,16 +112,14 @@ while running:
     screen.blit(bg, (0, 0))
 
     if calc_eq:
-        x_coeff, y_coeff = ball.trajectory_equation(100, 55, ball.rect.center[0], ball.rect.center[1])
-        print(x_coeff, x_coeff)
+        x_coeff, y_coeff = ball.trajectory_equation(70, 55, ball.rect.center[0], ball.rect.center[1])
+        #speed should be between 50 and 150
+        print(x_coeff, y_coeff)
         calc_eq = False
 
 
     if ball.rect.center[1]<500 and ball.rect.center[0]<1000:
         ball.rect.center = ball.calc_pos(x_coeff, y_coeff, t)
-
-    if ball.collision(hoop):
-        pygame.draw.rect(screen, blue_efrei, rect)
 
     ball.draw(screen)
     hoop.draw(screen)
