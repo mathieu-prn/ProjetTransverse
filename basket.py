@@ -71,10 +71,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    screen.fill(black)
+    screen.fill((240, 240, 240, 0.5))
+    screen.blit(bg, (0, 0))
 
     if calc_eq:
-        x_coeff, y_coeff = ball.trajectory_equation(100, 20, ball.rect.center[0], ball.rect.center[1])
+        x_coeff, y_coeff = ball.trajectory_equation(100, 40, ball.rect.center[0], ball.rect.center[1])
         print(x_coeff, x_coeff)
         calc_eq = False
 
