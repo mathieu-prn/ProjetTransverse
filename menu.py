@@ -52,7 +52,7 @@ while running:
     pygame.draw.rect(screen, (blue_efrei), (564, 360, 348, 98), 0, 48)
     pygame.draw.rect(screen, ((255, 255, 255)), (564 + 6, 360 + 6, 348 - 12, 98 - 12), 0, 48)
     txt_start = font.render("Start", True, (blue_efrei))
-    screen.blit(txt_menu, (676, 372))
+    screen.blit(txt_start, (676, 372))
 
     # Update the display
     pygame.display.flip()
