@@ -9,6 +9,8 @@ HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Basketball")
 bg = pygame.image.load("assets/Background.png")
+pygame_icon = pygame.image.load('assets/logo.png')
+pygame.display.set_icon(pygame_icon)
 
 # Initialize Colors
 black = (0, 0, 0)
