@@ -51,10 +51,10 @@ class Ball(pygame.sprite.Sprite):
 class Hoop(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/Basket/Panier coté mur.png")
-        self.image = pygame.transform.scale(img,(225,155))
+        img = pygame.image.load("assets/Basket/wall_net.png")
+        self.image = pygame.transform.scale(img,(190,156))
         self.rect = self.image.get_rect()
-        self.rect.center = (925,200)
+        self.rect.center = (890,200)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
