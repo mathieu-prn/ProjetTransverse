@@ -21,20 +21,21 @@ grey=(211,211,211)
 G = 9.81
 dt = 1/10
 t = 0
+PI = math.pi
 
 clock = pygame.time.Clock()
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/GolfBall.png")
-        self.image = pygame.transform.scale(img, (15, 15))
+        img = pygame.image.load("assets/Basket/BasketBall.png")
+        self.image = pygame.transform.scale(img, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.center = (50, 400)
 
     def trajectory_equation(self, speed, angle, x0, y0):
-        v_x = speed * math.cos(angle)
-        v_y = speed * math.sin(angle)
+        v_x = speed * math.cos(angle * math.pi/180)
+        v_y = speed * math.sin(angle * math.pi/180)
         x = (v_x, x0)
         y = (0.5 * G, -v_y, y0)
         return x, y
@@ -96,7 +97,7 @@ while running:
     screen.fill(black)
 
     if calc_eq:
-        x_coeff, y_coeff = ball.trajectory_equation(100, 45, ball.rect.center[0], ball.rect.center[1])
+        x_coeff, y_coeff = ball.trajectory_equation(100, 20, ball.rect.center[0], ball.rect.center[1])
         print(x_coeff, x_coeff)
         calc_eq = False
 
