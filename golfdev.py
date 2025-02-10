@@ -54,15 +54,17 @@ class Ball(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(self.image, self.rect)
 
-    def collision(self,walls):
+    def collision(self, walls):
         for wall in walls:
-            if pygame.Rect.colliderect(pygame.Rect(self.rect.inflate(5,5)),wall.rect):
+            if pygame.Rect.colliderect(self.rect.inflate(5, 5), wall.rect):
                 print("collided with", wall)
-                if wall.rect[2]==6:
+                if wall.rect.height == 6:
+                    self.angle = -self.angle  # Reflect across the X-axis
+                    self.rect.centery += 2 * math.sin(self.angle)
+                elif wall.rect.width == 6:
                     self.angle = math.pi - self.angle  # Reflect across the Y-axis
-                elif wall.rect[3]==6:
-                    self.angle = -self.angle
-                self.velocity *= 0.9  # Optional: Reduce velocity slightly to simulate energy loss
+                    self.rect.centerx += 2 * math.cos(self.angle)
+                self.velocity *= 0.9  # Energy loss due to bounce
                 return True
 
     def checkwin(self):
@@ -71,9 +73,9 @@ class Ball(pygame.sprite.Sprite):
 
     def updateposition(self,launched):
         if launched:
-            self.velocity=slider.get_value()*0.4
+            self.velocity=slider.get_value()*0.2
             self.angle = arrow.angle
-        acceleration=-0.7
+        acceleration=-0.1
         vx=self.velocity*math.cos(self.angle)
         vy=self.velocity*math.sin(self.angle)
         x,y=self.rect.center
@@ -136,7 +138,7 @@ class Launch(pygame.sprite.Sprite):
 
     def clicked(self,event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos):
+            if self.rect.collidepoint(event.pos) and ball.velocity==0:
                 self.color= grey
                 ball.updateposition(True)
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -305,7 +307,7 @@ while running:
     arrow.update_direction((mouse_x, mouse_y))
 
     # Draw ball and arrow
-    button.draw()
+
 
     # check for collisions
     ball.collision(walls)
@@ -314,6 +316,7 @@ while running:
     else:
         arrow.draw()
         slider.draw()
+        button.draw()
 
     #Load Level
     level.draw()
@@ -328,7 +331,7 @@ while running:
     pygame.display.flip()
 
     # Set the frame rate --> Don't change
-    clock.tick(120)
+    clock.tick(60)
 
 # Quit the game
 pygame.quit()
