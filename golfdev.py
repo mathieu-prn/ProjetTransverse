@@ -1,4 +1,5 @@
 import pygame, json, math
+from utility import *
 
 # Initialize Pygame
 pygame.init()
@@ -18,11 +19,6 @@ blue_efrei=(18,121,190)
 grey=(211,211,211)
 green=(148,186,134)
 
-def getrelativepos(pos):
-    '''Returns the relative position to the field: (0,0) is the top left corner'''
-    x,y=pos
-    return x+80,y+55
-
 def getlevel():
     '''Reads the level number saved in the saves file and returns it'''
     filename="saves/golflevel.json"
@@ -32,9 +28,16 @@ def getlevel():
             print("Returned level:",value)
             return value
 
-def loadfile(file):
-    '''Loads json files'''
-    return json.load(open(file))
+def updatelevel(levelnumber):
+    '''Updates the level number saved in the saves file and returns it'''
+    filename="saves/golflevel.json"
+    dico=loadfile(filename)
+    for key,value in dico.items():
+        if key=="level":
+            dico[key]=levelnumber
+            with open(filename,"w") as file:
+                json.dump(dico,file)
+            level.number=levelnumber
 
 
 class Ball(pygame.sprite.Sprite):
@@ -52,6 +55,11 @@ class Ball(pygame.sprite.Sprite):
         for wall in walls:
             if pygame.Rect.colliderect(self.rect,wall.rect):
                 return wall
+
+    def checkwin(self):
+        if pygame.Rect.colliderect(self.rect, level.hole.collisionrect):
+            return True
+
 
 class Slider(pygame.sprite.Sprite):
     def __init__(self):
@@ -96,16 +104,19 @@ class Launch(pygame.sprite.Sprite):
         self.height=80
         self.color= white
         self.rect=pygame.Rect(self.x, self.y, self.width, self.height)
+
     def draw(self):
         pygame.draw.rect(screen, blue_efrei, self.rect.inflate(6, 6))
         pygame.draw.rect(screen, self.color, self.rect)
         font = pygame.font.Font(None, 45)
         text = font.render(f"Go!", True, blue_efrei)
         screen.blit(text, (self.x, self.y+30))
+
     def clicked(self,event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 self.color= grey
+                ball.rect.center=getrelativepos((836,212.5))
         elif event.type == pygame.MOUSEBUTTONUP:
             self.color= white
 
@@ -190,7 +201,9 @@ class Hole(pygame.sprite.Sprite):
         self.image=pygame.image.load("assets/Golf/Hole.png")
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.collisionrect=pygame.draw.circle(screen, white, self.rect.center, 7)
     def draw(self):
+        pygame.draw.circle(screen, white, self.rect.center, 7)
         screen.blit(self.image, self.rect)
 
 class Level(pygame.sprite.Sprite):
@@ -199,10 +212,12 @@ class Level(pygame.sprite.Sprite):
         self.number=number
         self.hole=Hole(getrelativepos(hole_pos))
         self.flag=Flag(getrelativepos(hole_pos))
+
     def load(self):
         self.hole.draw()
         self.flag.draw()
         #Load the right level depending on the level number
+        print("Loaded level",self.number)
         match self.number:
             case 1:
                 wall1=Wall(750,212.5,6,200,walls,False)
@@ -231,7 +246,7 @@ arrow=Arrow()
 mouse_pressed = False
 follow = True
 
-#Levels
+#Level
 level=Level(getlevel(),(850,212.5)) #set the initial level
 
 # Game loop --> repeats until we leave the game
@@ -263,16 +278,20 @@ while running:
     field.draw()
 
     #Objects
-    ball.draw()
     slider.draw()
     button.draw()
     arrow.draw()
 
     #Load Level
     level.load()
+    ball.draw()
 
     #check for collisions
     ball.collision(walls)
+
+    if ball.checkwin():
+        ball.rect.center = getrelativepos((25, 212.5))
+        updatelevel(level.number+1)
 
     # Update the display --> Update the new display with the new objects and positions
     pygame.display.flip()
