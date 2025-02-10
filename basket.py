@@ -27,8 +27,8 @@ clock = pygame.time.Clock()
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load("assets/GolfBall.png")
-        self.image = pygame.transform.scale(img, (15, 15))
+        img = pygame.image.load("assets/Basket/BasketBall.png")
+        self.image = pygame.transform.scale(img, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.center = (50, 400)
 
