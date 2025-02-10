@@ -60,6 +60,18 @@ while running:
     txt_golf = font.render("Bowling", True, (blue_efrei))
     screen.blit(txt_golf, (x_pos_rect + 56, y_pos_rect + 12 + s))
 
+    # Photo jeu
+    pygame.draw.rect(screen, (blue_efrei), (398, 16, 534, 302), 0, 24)
+    pygame.draw.rect(screen, ((234,234,234)), (400, 18, 530, 298), 0, 24)
+
+    # Button historic
+    pygame.draw.rect(screen, (blue_efrei), (398, 332, 160, 160), 0, 24)
+    pygame.draw.rect(screen, ((234,234,234)), (400, 334, 156, 156), 0, 24)
+
+    # Button play
+    pygame.draw.rect(screen, (blue_efrei), (772, 332, 160, 160), 0, 24)
+    pygame.draw.rect(screen, ((234, 234, 234)), (774, 334, 156, 156), 0, 24)
+
 
     # Update the display
     pygame.display.flip()
