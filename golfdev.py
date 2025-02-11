@@ -57,18 +57,48 @@ class Ball(pygame.sprite.Sprite):
     def collision(self, walls):
         for wall in walls:
             if pygame.Rect.colliderect(self.rect.inflate(5, 5), wall.rect):
-                print("collided with", wall)
-                if wall.rect.height == 6:
-                    self.angle = -self.angle  # Reflect across the X-axis
-                    self.rect.centery += 2 * math.sin(self.angle)
-                elif wall.rect.width == 6:
-                    self.angle = math.pi - self.angle  # Reflect across the Y-axis
-                    self.rect.centerx += 2 * math.cos(self.angle)
-                self.velocity *= 0.9  # Energy loss due to bounce
+                print("Collided with", wall)
+
+                dx = min(abs(self.rect.right - wall.rect.left), abs(self.rect.left - wall.rect.right))
+                dy = min(abs(self.rect.bottom - wall.rect.top), abs(self.rect.top - wall.rect.bottom))
+
+                if dx < dy:  # More movement in X direction → Vertical Wall Collision
+                    print("Vertical Wall Collision")
+                    self.angle = math.pi - self.angle  # Reflect X direction
+                    self.rect.x += 2 * math.cos(self.angle)  # Move out of collision
+
+                elif dy<dx:
+                    print("Horizontal Wall Collision")
+                    self.angle = -self.angle  # Reflect Y direction
+                    self.rect.y += 2 * math.sin(self.angle)  # Move out of collision
+
+                else:
+                    print("Corner Collision")
+                    self.angle = self.angle + math.pi  # Reflect both X and Y direction
+                    self.rect.x += 2 * math.cos(self.angle)  # Move out of collision
+                    self.rect.y += 2 * math.sin(self.angle)  # Move out of collision
+
+                self.velocity *= 0.9  # Energy loss on bounce
+
                 return True
+        return False
+
+    def unstuck(self):
+        if ball.rect.left<field.rect.left:
+            print("Tried to unstuck left")
+            ball.rect.center=(ball.rect.center[0]+4,ball.rect.center[1])
+        elif ball.rect.right>field.rect.right:
+            print("Tried to unstuck right")
+            ball.rect.center=(ball.rect.center[0]-4,ball.rect.center[1])
+        elif ball.rect.top<field.rect.top:
+            print("Tried to unstuck top")
+            ball.rect.center=(ball.rect.center[0],ball.rect.center[1]+4)
+        elif ball.rect.bottom>field.rect.bottom:
+            print("Tried to unstuck bottom")
+            ball.rect.center=(ball.rect.center[0],ball.rect.center[1]-4)
 
     def checkwin(self):
-        if pygame.Rect.colliderect(self.rect, level.hole.collisionrect) and self.velocity<10:
+        if pygame.Rect.colliderect(self.rect, level.hole.collisionrect) and self.velocity<5:
             return True
 
     def updateposition(self,launched):
@@ -203,9 +233,10 @@ class Flag(pygame.sprite.Sprite):
     def __init__(self,pos):
         pygame.sprite.Sprite.__init__(self)
         self.image=pygame.image.load("assets/Golf/Flag.png")
-        self.rect=self.image.get_rect()
         self.x,self.y=pos
+        self.rect=self.image.get_rect()
         self.pos=(self.x-7,self.y-75)
+        self.rect=pygame.Rect(self.x-self.rect[2]/2,self.y-self.rect[3],self.rect[2],self.rect[3])
     def draw(self):
         screen.blit(self.image, self.pos)
 
@@ -252,7 +283,8 @@ class Level(pygame.sprite.Sprite):
         for wall in walls:
             wall.draw()
         self.hole.draw()
-        self.flag.draw()
+        if not pygame.Rect.colliderect(self.flag.rect, ball.rect) or ball.velocity != 0:
+            self.flag.draw()
 
 #Create field
 field=Field()
@@ -311,6 +343,7 @@ while running:
 
     # check for collisions
     ball.collision(walls)
+    ball.unstuck()
     if ball.velocity>0:
         ball.updateposition(False)
     else:
@@ -326,6 +359,7 @@ while running:
         ball.velocity=0
         ball.rect.center = getrelativepos((25, 212.5))
         updatelevel(level.number+1)
+
 
     # Update the display --> Update the new display with the new objects and positions
     pygame.display.flip()
