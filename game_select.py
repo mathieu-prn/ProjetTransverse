@@ -9,6 +9,7 @@ HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Menu")
 bg = pygame.image.load("assets/Background.png")
+play_button = pygame.image.load("assets/play_button.png")
 
 font = pygame.font.Font("../ProjetTransverse/assets/font.ttf", 36)
 
@@ -71,6 +72,8 @@ while running:
     # Button play
     pygame.draw.rect(screen, (blue_efrei), (772, 332, 160, 160), 0, 24)
     pygame.draw.rect(screen, ((234, 234, 234)), (774, 334, 156, 156), 0, 24)
+    screen.blit(play_button, (824, 376))
+
 
 
     # Update the display
