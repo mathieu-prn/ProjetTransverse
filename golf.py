@@ -429,7 +429,10 @@ class Message(pygame.sprite.Sprite):
 
     def draw(self, msg_type):
         if msg_type == "win":
-            msg = f"You won in {score.score} shots!"
+            if score.score==1:
+                msg = f"You scored a Hole-in-one! Congratulations!"
+            else:
+                msg = f"You won in {score.score} shots!"
             button_msg = "Next level"
         elif msg_type == "lose":
             msg = f"You didn't succeed to score in 5 shots. You lost!"
