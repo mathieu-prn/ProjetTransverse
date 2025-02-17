@@ -1,0 +1,1 @@
+Wave pattern by Dmitry Kovalev from <a href="https://thenounproject.com/browse/icons/term/wave-pattern/" target="_blank" title="Wave pattern Icons">Noun Project</a> (CC BY 3.0)
