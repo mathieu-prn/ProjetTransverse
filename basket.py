@@ -24,6 +24,7 @@ G = 9.81
 dt = 1/10
 t = 0
 PI = math.pi
+bounce_coeff = 0.7
 
 clock = pygame.time.Clock()
 
@@ -103,6 +104,10 @@ scene.add_object(borderleft)
 scene.add_object(borderright)
 scene.add_object(borderbottom)
 
+
+v_now = 70
+angle = 45
+final_pos =()
 # Game loop
 running = True
 while running:
@@ -114,14 +119,24 @@ while running:
     screen.blit(bg, (0, 0))
 
     if calc_eq:
-        x_coeff, y_coeff = ball.trajectory_equation(70, 55, ball.rect.center[0], ball.rect.center[1])
+        x_coeff, y_coeff = ball.trajectory_equation(v_now, angle, ball.rect.center[0], ball.rect.center[1])
         #speed should be between 50 and 150
-        print(x_coeff, y_coeff)
         calc_eq = False
 
+    v_now = math.sqrt((math.cos(55) * v_now)**2 + (G * t + math.sin(55) * v_now)**2)
 
-    if ball.rect.center[1]<500 and ball.rect.center[0]<1000:
-        ball.rect.center = ball.calc_pos(x_coeff, y_coeff, t)
+    if ball.rect.center[1]>=450 and t>0.5 :
+        x_coeff, y_coeff = ball.trajectory_equation(bounce_coeff*v_now, angle, ball.rect.center[0], ball.rect.center[1])
+        t = 0
+
+
+    if final_pos == ():
+        if v_now < 0.1:
+            final_pos = (ball.rect.center[0], ball.rect.center[1])
+        else:
+            ball.rect.center = ball.calc_pos(x_coeff, y_coeff, t)
+    else:
+        ball.rect.center = final_pos
 
     ball.draw(screen)
     hoop.draw(screen)
