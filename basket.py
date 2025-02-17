@@ -43,6 +43,10 @@ class Ball(pygame.sprite.Sprite):
         y = (0.5 * G, -v_y, y0)
         return x, y
 
+    def collision(self):
+        if self.rect.colliderect(hoop_detector.rect):
+            print("TG")
+
     def calc_pos(self, x_coeff, y_coeff, time):
         new_x = x_coeff[0]*time + x_coeff[1]
         new_y = y_coeff[0]*(time**2) + y_coeff[1]*time + y_coeff[2]
@@ -62,7 +66,7 @@ class Hoop(pygame.sprite.Sprite):
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
-class Wall(pygame.sprite.Sprite):
+class Border(pygame.sprite.Sprite):
     def __init__(self,relative_x,relative_y,width,height,isborder):
         pygame.sprite.Sprite.__init__(self)
         self.color=blue_efrei
@@ -75,6 +79,22 @@ class Wall(pygame.sprite.Sprite):
             self.rect=pygame.Rect(self.x+80, self.y+55, self.width, self.height)
     def draw(self,surface):
         pygame.draw.rect(surface, self.color, self.rect)
+
+class Hoop_detector(pygame.sprite.Sprite):
+    def __init__(self, x,y):
+        pygame.sprite.Sprite.__init__(self)
+        self.color=(0, 0, 0)
+        self.x=x
+        self.y=y
+        self.width=100
+        self.height=10
+        self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.image.fill(self.color)
+        self.rect=self.image.get_rect()
+        self.rect.center= (x,y)
+
+    def draw(self,surface):
+        pygame.draw.rect(surface,self.color,(self.x, self.y, self.width, self.height))
 
 #Associate all the different rectangles of the Hoop
 class Scene:
@@ -91,10 +111,11 @@ class Scene:
 #Object initialization
 ball = Ball()
 hoop = Hoop()
-bordertop=Wall(0,0,900,6,True)
-borderleft=Wall(0,0,6,425,True)
-borderbottom=Wall(0,425,900,6,True)
-borderright=Wall(900,0,6,431,True)
+hoop_detector= Hoop_detector(792,220)
+bordertop=Border(0,0,900,6,True)
+borderleft=Border(0,0,6,425,True)
+borderbottom=Border(0,425,900,6,True)
+borderright=Border(900,0,6,431,True)
 calc_eq = True
 
 # Create the scene and add the walls
@@ -105,8 +126,8 @@ scene.add_object(borderright)
 scene.add_object(borderbottom)
 
 
-v_now = 70
-angle = 45
+v_now = 100
+angle = 50
 final_pos =()
 # Game loop
 running = True
@@ -138,9 +159,12 @@ while running:
     else:
         ball.rect.center = final_pos
 
+    ball.collision()
+    hoop_detector.draw(screen)
     ball.draw(screen)
     hoop.draw(screen)
     scene.draw(screen)
+
     # Update the display
     pygame.display.flip()
     t+=dt
