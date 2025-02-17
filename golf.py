@@ -163,7 +163,7 @@ class Slider(pygame.sprite.Sprite):
     def get_value(self):
         min_y = self.rect.top
         max_y = self.rect.bottom - self.slider_rect.height
-        return int(100 - ((self.slider_rect.y - min_y) / (max_y - min_y)) * 100)
+        return int(100 - (((self.slider_rect.y - min_y) / (max_y - min_y)) * 100))+int(10*((self.slider_rect.y - min_y) / (max_y - min_y)))
 
 class Launch(pygame.sprite.Sprite):
     def __init__(self):
@@ -327,33 +327,35 @@ class Level(pygame.sprite.Sprite):
         elif self.number == 8:
             self.hole = Hole(getrelativepos((850, 75)))
             self.flag = Flag(getrelativepos((850, 75)))
-            self.level_walls.append(Wall(300, 212.5, 6, 300, False))
-            self.level_walls.append(Wall(700, 212.5, 6, 200, False))
-            self.level_water.append(Water(getrelativepos((500, 350)), 250, 100))
+            self.level_bunkers.append(Bunker(getrelativepos((250,275)), 100, 300))
+            self.level_bunkers.append(Bunker(getrelativepos((650, 150)), 100, 300))
+            self.level_bunkers.append(Bunker(getrelativepos((250, 37.5)), 100, 75))
+            self.level_bunkers.append(Bunker(getrelativepos((650, 386.5)), 100, 75))
 
         elif self.number == 9:
             self.hole = Hole(getrelativepos((850, 50)))
             self.flag = Flag(getrelativepos((850, 50)))
-            self.level_walls.append(Wall(400, 150, 6, 200, False))
-            self.level_walls.append(Wall(600, 275, 6, 200, False))
-            self.level_bunkers.append(Bunker(getrelativepos((500, 350)), 300, 150))
-            self.level_water.append(Water(getrelativepos((700, 100)), 200, 100))
+            self.level_walls.append(Wall(150, 325, 6, 200, False))
+            self.level_walls.append(Wall(750, 325, 6, 200, False))
+            self.level_walls.append(Wall(450, 160, 6, 280, False))
+            self.level_walls.append(Wall(450, 300, 300, 6, False))
 
         elif self.number == 10:
             self.hole = Hole(getrelativepos((850, 300)))
             self.flag = Flag(getrelativepos((850, 300)))
             self.level_walls.append(Wall(300, 212.5, 6, 250, False))
             self.level_walls.append(Wall(600, 100, 6, 200, False))
-            self.level_bunkers.append(Bunker(getrelativepos((450, 250)), 200, 100))
-            self.level_water.append(Water(getrelativepos((700, 375)), 250, 125))
+            self.level_bunkers.append(Bunker(getrelativepos((600, 325)), 250, 100))
 
         elif self.number == 11:
-            self.hole = Hole(getrelativepos((850, 75)))
-            self.flag = Flag(getrelativepos((850, 75)))
-            self.level_walls.append(Wall(500, 250, 6, 300, False))
-            self.level_walls.append(Wall(250, 100, 6, 200, False))
-            self.level_bunkers.append(Bunker(getrelativepos((600, 350)), 250, 100))
-            self.level_water.append(Water(getrelativepos((400, 200)), 200, 100))
+            self.hole = Hole(getrelativepos((850, 375)))
+            self.flag = Flag(getrelativepos((850, 375)))
+            self.level_walls.append(Wall(200, 75 / 2, 6, 75, False))
+            self.level_walls.append(Wall(200, 425 - 275 / 2, 6, 275, False))
+            self.level_walls.append(Wall(450, 175 / 2, 6, 175, False))
+            self.level_walls.append(Wall(450, 425-175/2, 6, 175, False))
+            self.level_walls.append(Wall(700, 275 / 2, 6, 275, False))
+            self.level_walls.append(Wall(700, 425-75 / 2, 6, 75, False))
 
         elif self.number == 12:
             self.hole = Hole(getrelativepos((850, 400)))
@@ -502,8 +504,11 @@ while running:
             slider.handle_event(event)
             launch_button.clicked(event)
             if event.type == pygame.MOUSEBUTTONDOWN and ball.velocity == 0:
-                if field.rect.collidepoint(event.pos):
-                    arrow_follow = not arrow_follow
+                if arrow_follow:
+                    arrow_follow = False
+                else:
+                    if field.rect.collidepoint(event.pos):
+                        arrow_follow = True
             if event.type == pygame.MOUSEBUTTONUP:
                 launch_button.color = WHITE
                 message.button_color = WHITE
