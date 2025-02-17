@@ -151,10 +151,14 @@ class Slider(pygame.sprite.Sprite):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.slider_rect.collidepoint(event.pos):
                 self.dragging = True
+            elif self.rect.collidepoint(event.pos):
+                self.slider_rect.y = max(self.rect.top, min(event.pos[1], self.rect.bottom - self.slider_rect.height))
+                self.dragging = True
         elif event.type == pygame.MOUSEBUTTONUP:
             self.dragging = False
         elif event.type == pygame.MOUSEMOTION and self.dragging:
             self.slider_rect.y = max(self.rect.top, min(event.pos[1], self.rect.bottom - self.slider_rect.height))
+
 
     def get_value(self):
         min_y = self.rect.top
