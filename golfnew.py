@@ -163,7 +163,7 @@ class Slider(pygame.sprite.Sprite):
     def get_value(self):
         min_y = self.rect.top
         max_y = self.rect.bottom - self.slider_rect.height
-        return int(100 - ((self.slider_rect.y - min_y) / (max_y - min_y)) * 100)
+        return int(100 - (((self.slider_rect.y - min_y) / (max_y - min_y)) * 100))+int(10*((self.slider_rect.y - min_y) / (max_y - min_y)))
 
 class Launch(pygame.sprite.Sprite):
     def __init__(self):
