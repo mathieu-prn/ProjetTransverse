@@ -35,6 +35,7 @@ class Ball(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(img, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.center = (50, 400)
+        self.scored=False
 
     def trajectory_equation(self, speed, angle, x0, y0):
         v_x = speed * math.cos(angle * math.pi/180)
@@ -45,7 +46,11 @@ class Ball(pygame.sprite.Sprite):
 
     def collision(self):
         if self.rect.colliderect(hoop_detector.rect):
-            print("TG")
+            if not self.scored:
+                score.increment()
+                self.scored = True
+        if not self.rect.colliderect(hoop_detector.rect):
+            self.scored = False
 
     def calc_pos(self, x_coeff, y_coeff, time):
         new_x = x_coeff[0]*time + x_coeff[1]
@@ -96,6 +101,23 @@ class Hoop_detector(pygame.sprite.Sprite):
     def draw(self,surface):
         pygame.draw.rect(surface,self.color,(self.x, self.y, self.width, self.height))
 
+class Score(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.score = 0
+        self.font = pygame.font.Font("assets/font.ttf", 28)
+
+    def increment(self):
+        self.score += 1
+
+    def reset(self):
+        self.score = 0
+
+    def draw(self, surface=screen):
+        text = self.font.render(f"Points: {self.score}", True, blue_efrei)
+        surface.blit(text, (10, 10))
+
+
 #Associate all the different rectangles of the Hoop
 class Scene:
     def __init__(self):
@@ -111,6 +133,7 @@ class Scene:
 #Object initialization
 ball = Ball()
 hoop = Hoop()
+score=Score()
 hoop_detector= Hoop_detector(792,220)
 bordertop=Border(0,0,900,6,True)
 borderleft=Border(0,0,6,425,True)
@@ -164,6 +187,7 @@ while running:
     ball.draw(screen)
     hoop.draw(screen)
     scene.draw(screen)
+    score.draw(screen)
 
     # Update the display
     pygame.display.flip()
