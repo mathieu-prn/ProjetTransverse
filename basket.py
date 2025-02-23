@@ -1,4 +1,4 @@
-import pygame, math
+import pygame, math, random
 
 # Initialize Pygame
 pygame.init()
@@ -36,14 +36,15 @@ class Ball(pygame.sprite.Sprite):
         self.rect.center = (100, 400)
         self.scored=False
         self.velocity = 0
+        self.angle = 0
         self.x_coeff = (0, self.rect.center[0])
         self.y_coeff = (0, 0, self.rect.center[1])
         self.time = 0
         self.launched = False
 
     def trajectory_equation(self, speed, angle, x0, y0):
-        v_x = speed * math.cos(angle * math.pi/180)
-        v_y = speed * math.sin(angle * math.pi/180)
+        v_x = speed * math.cos(angle)
+        v_y = speed * math.sin(angle)
         self.x_coeff = (v_x, x0)
         self.y_coeff = (0.5 * G, -v_y, y0)
 
@@ -141,25 +142,18 @@ class Slider(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.rect = pygame.Rect(25, 150, 30, 200)
-        self.slider_rect = pygame.Rect(25, 250, 30, 7)
-        self.dragging = False
+        self.slider_rect = pygame.Rect(25, 151, 30, 7)
+        self.speed = 3
 
     def draw(self, surface):
         pygame.draw.rect(surface, blue_efrei, self.rect.inflate(6, 6))
         pygame.draw.rect(surface, white, self.rect)
         pygame.draw.rect(surface, black, self.slider_rect)
 
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.slider_rect.collidepoint(event.pos):
-                self.dragging = True
-            elif self.rect.collidepoint(event.pos):
-                self.slider_rect.y = max(self.rect.top, min(event.pos[1], self.rect.bottom - self.slider_rect.height))
-                self.dragging = True
-        elif event.type == pygame.MOUSEBUTTONUP:
-            self.dragging = False
-        elif event.type == pygame.MOUSEMOTION and self.dragging:
-            self.slider_rect.y = max(self.rect.top, min(event.pos[1], self.rect.bottom - self.slider_rect.height))
+    def move(self):
+        if not self.rect.y < self.slider_rect.y < self.rect.y + self.rect.height - self.slider_rect.height:
+            self.speed = - self.speed
+        self.slider_rect.y += self.speed
 
     def get_value(self):
         min_y = self.rect.top
@@ -184,16 +178,44 @@ class Launch(pygame.sprite.Sprite):
             if self.rect.collidepoint(event.pos):
                 self.color = grey
                 ball.velocity = (slider.get_value()/100) * 120
-                ball.trajectory_equation(ball.velocity, 50, ball.rect.center[0], ball.rect.center[1])
+                ball.trajectory_equation(ball.velocity, ball.angle, ball.rect.center[0], ball.rect.center[1])
                 ball.launched = True
         elif event.type == pygame.MOUSEBUTTONUP:
             self.color = white
+
+class Arrow(pygame.sprite.Sprite):
+    def __init__(self, length=50):
+        super().__init__()
+        self.length = length
+        self.direction = pygame.Vector2(1, 0)
+        self.angle = 0
+        self.follow = True
+
+    def draw(self, surface):
+        arrow_end = pygame.Vector2(ball.rect.center) + self.direction * (20 + slider.get_value())
+        pygame.draw.line(surface, blue_efrei, ball.rect.center, arrow_end, 3)
+        self.angle = math.atan2(self.direction.y, self.direction.x)
+        arrow_angle = math.atan2(-self.direction.y, -self.direction.x)
+        arrow_size = 10
+        left = (arrow_end.x + arrow_size * math.cos(arrow_angle + math.pi / 6),
+                arrow_end.y + arrow_size * math.sin(arrow_angle + math.pi / 6))
+        right = (arrow_end.x + arrow_size * math.cos(arrow_angle - math.pi / 6),
+                 arrow_end.y + arrow_size * math.sin(arrow_angle - math.pi / 6))
+        pygame.draw.polygon(surface, blue_efrei, [arrow_end, left, right])
+
+    def update_direction(self, mouse_pos):
+        if arrow.follow:
+            direction = pygame.Vector2(mouse_pos) - pygame.Vector2(ball.rect.center)
+            if direction.length() > 0:
+                self.direction = direction.normalize()
+                self.angle = math.atan2(self.direction.y, self.direction.x)
 
 #Object initialization
 ball = Ball()
 hoop = Hoop()
 score=Score()
 slider = Slider()
+arrow = Arrow()
 launch_button = Launch()
 hoop_detector= Hoop_detector(792,220)
 bordertop=Border(0,0,900,6,True)
@@ -208,29 +230,33 @@ scene.add_object(borderleft)
 scene.add_object(borderright)
 scene.add_object(borderbottom)
 
-ball.velocity = 90
-angle = 50
 # Game loop
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        slider.handle_event(event)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            arrow.follow = not arrow.follow
         launch_button.clicked(event)
+
 
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg, (0, 0))
 
     if ball.ground_collision():
-        ball.trajectory_equation(bounce_coeff*ball.velocity, angle, ball.rect.center[0], ball.rect.center[1])
+        ball.trajectory_equation(bounce_coeff*ball.velocity, ball.angle, ball.rect.center[0], ball.rect.center[1])
         ball.time = dt
 
     if ball.launched:
         ball.update_pos()
+    else:
+        arrow.draw(screen)
+        arrow.update_direction(pygame.mouse.get_pos())
+        ball.angle = -arrow.angle
+        slider.move()
 
     ball.hoop_collision()
-
     hoop_detector.draw(screen)
     ball.draw(screen)
     hoop.draw(screen)
@@ -238,7 +264,6 @@ while running:
     score.draw(screen)
     slider.draw(screen)
     launch_button.draw()
-
     # Update the display
     pygame.display.flip()
     # Set the frame rate
