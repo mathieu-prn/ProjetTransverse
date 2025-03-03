@@ -33,7 +33,7 @@ class Ball(pygame.sprite.Sprite):
         img = pygame.image.load("assets/Basket/BasketBall.png")
         self.image = pygame.transform.scale(img, (50, 50))
         self.rect = self.image.get_rect()
-        self.rect.center = (100, 400)
+        self.rect.center = (150, 400)
         self.scored=False
         self.velocity = 0
         self.angle = 0
@@ -56,9 +56,17 @@ class Ball(pygame.sprite.Sprite):
         if not self.rect.colliderect(hoop_detector.rect):
             self.scored = False
 
-    def ground_collision(self):
+    def wall_collision(self):
         if self.rect.colliderect(borderbottom.rect):
-            return True
+            return 1
+        elif self.rect.colliderect(borderright.rect):
+            return 2
+        elif self.rect.colliderect(bordertop.rect):
+            return 3
+        elif self.rect.colliderect(borderleft.rect):
+            return 4
+        else:
+            return False
 
     def update_pos(self):
         self.rect.center = self.x_coeff[0]*self.time + self.x_coeff[1], self.y_coeff[0]*(self.time**2) + self.y_coeff[1]*self.time + self.y_coeff[2]
@@ -158,7 +166,7 @@ class Slider(pygame.sprite.Sprite):
     def get_value(self):
         min_y = self.rect.top
         max_y = self.rect.bottom - self.slider_rect.height
-        return int(100 - (((self.slider_rect.y - min_y) / (max_y - min_y)) * 100)) + int(10 * ((self.slider_rect.y - min_y) / (max_y - min_y)))
+        return int(150 - (((self.slider_rect.y - min_y) / (max_y - min_y)) * 100)) + int(10 * ((self.slider_rect.y - min_y) / (max_y - min_y)))
 
 class Launch(pygame.sprite.Sprite):
     def __init__(self):
@@ -244,14 +252,20 @@ while running:
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg, (0, 0))
 
-    if ball.ground_collision():
-        ball.trajectory_equation(bounce_coeff*ball.velocity, ball.angle, ball.rect.center[0], ball.rect.center[1])
+    if ball.wall_collision():
+        if ball.wall_collision()%2 == 0:
+            test = 1
+        else:
+            test = -1
+        ball.trajectory_equation(bounce_coeff*ball.velocity,test * (ball.wall_collision()-1)*math.pi/2 + ball.angle, ball.rect.center[0], ball.rect.center[1])
         ball.time = dt
 
     if ball.launched:
         ball.update_pos()
     else:
         arrow.draw(screen)
+        slider.draw(screen)
+        launch_button.draw()
         arrow.update_direction(pygame.mouse.get_pos())
         ball.angle = -arrow.angle
         slider.move()
@@ -262,8 +276,6 @@ while running:
     hoop.draw(screen)
     scene.draw(screen)
     score.draw(screen)
-    slider.draw(screen)
-    launch_button.draw()
     # Update the display
     pygame.display.flip()
     # Set the frame rate
