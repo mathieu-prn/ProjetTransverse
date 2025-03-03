@@ -49,10 +49,11 @@ class Ball(pygame.sprite.Sprite):
         self.y_coeff = (0.5 * G, -v_y, y0)
 
     def hoop_collision(self):
-        if self.rect.colliderect(hoop_detector.rect):
-            if not self.scored:
-                score.increment()
-                self.scored = True
+        if self.rect.bottom > hoop_detector.rect.top and self.velocity > 0:
+            if self.rect.colliderect(hoop_detector.rect):
+                if not self.scored:
+                    score.increment()
+                    self.scored = True
         if not self.rect.colliderect(hoop_detector.rect):
             self.scored = False
 
@@ -107,8 +108,8 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.color=(0, 0, 0)
         self.x=x
         self.y=y
-        self.width=100
-        self.height=10
+        self.width=50
+        self.height=5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.image.fill(self.color)
         self.rect=self.image.get_rect()
@@ -225,7 +226,7 @@ score=Score()
 slider = Slider()
 arrow = Arrow()
 launch_button = Launch()
-hoop_detector= Hoop_detector(792,220)
+hoop_detector= Hoop_detector(816,220)
 bordertop=Border(0,0,900,6,True)
 borderleft=Border(0,0,6,425,True)
 borderbottom=Border(0,425,900,6,True)
@@ -271,7 +272,6 @@ while running:
         slider.move()
 
     ball.hoop_collision()
-    hoop_detector.draw(screen)
     ball.draw(screen)
     hoop.draw(screen)
     scene.draw(screen)
