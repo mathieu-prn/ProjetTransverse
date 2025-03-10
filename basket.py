@@ -259,7 +259,7 @@ while running:
         else:
             test = -1
         ball.trajectory_equation(bounce_coeff*ball.velocity,test * (ball.wall_collision()-1)*math.pi/2 + ball.angle, ball.rect.center[0], ball.rect.center[1])
-        ball.time = dt
+        ball.time = 2*dt
 
     if ball.launched:
         ball.update_pos()
