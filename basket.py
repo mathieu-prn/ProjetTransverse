@@ -47,6 +47,7 @@ class Ball(pygame.sprite.Sprite):
         v_y = speed * math.sin(angle)
         self.x_coeff = (v_x, x0)
         self.y_coeff = (0.5 * G, -v_y, y0)
+        self.time = 0
 
     def hoop_collision(self):
         if self.rect.bottom > hoop_detector.rect.top and self.velocity > 0:
@@ -268,13 +269,12 @@ while running:
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg, (0, 0))
 
-    if ball.wall_collision():
-        if ball.wall_collision()%2 == 0:
-            test = 1
-        else:
-            test = -1
-        ball.trajectory_equation(bounce_coeff*ball.velocity,test * (ball.wall_collision()-1)*math.pi/2 + ball.angle, ball.rect.center[0], ball.rect.center[1])
-        ball.time = 2*dt
+    print(ball.time)
+    if ball.wall_collision() and ball.time > 2*dt:
+        print(ball.x_coeff, ball.y_coeff)
+        ball.trajectory_equation(bounce_coeff*ball.velocity,(ball.wall_collision()-1)*math.pi/2 + ball.angle, ball.rect.center[0], ball.rect.center[1])
+        print(ball.x_coeff, ball.y_coeff)
+
 
     if ball.launched:
         ball.update_pos()
