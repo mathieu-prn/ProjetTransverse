@@ -486,6 +486,7 @@ class Message(pygame.sprite.Sprite):
         global display_msg, level, static_background
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.button_rect.collidepoint(event.pos):
+                soundeffect_clicked.play()
                 if won:
                     self.button_color = GREY
                     updatescore(level.number,score.score)
@@ -524,6 +525,7 @@ class Resetbutton(pygame.sprite.Sprite):
         global level, static_background
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
+                soundeffect_clicked.play()
                 self.color = GREY
                 end_level()
                 level = Level(getlevel())
@@ -550,10 +552,13 @@ message = Message()
 level = Level(getlevel())
 static_background = render_static_background(level)
 resetbutton = Resetbutton()
+
+#Define sound effects
 soundeffect_hole=pygame.mixer.Sound("assets/Golf/Sounds/hole.mp3")
 soundeffect_swing=pygame.mixer.Sound("assets/Golf/Sounds/swing.mp3")
 soundeffect_collisions=pygame.mixer.Sound("assets/Golf/Sounds/collisions.mp3")
-soundeffect_save=pygame.mixer.Sound("assets/Golf/Sounds/Save.mp3")
+soundeffect_save=pygame.mixer.Sound("assets/Golf/Sounds/save.mp3")
+soundeffect_clicked=pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
 
 clock = pygame.time.Clock()
 running = True
