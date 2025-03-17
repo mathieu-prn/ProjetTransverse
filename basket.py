@@ -8,8 +8,8 @@ WIDTH = 1000
 HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Basketball")
-bg = pygame.image.load("assets/Background.png")
-pygame_icon = pygame.image.load('assets/logo.png')
+bg = pygame.image.load("assets/Common/Background.png")
+pygame_icon = pygame.image.load('assets/Common/logo.png')
 pygame.display.set_icon(pygame_icon)
 
 # Initialize Colors
@@ -135,7 +135,7 @@ class Score(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.score = 0
-        self.font = pygame.font.Font("assets/font.ttf", 28)
+        self.font = pygame.font.Font("assets/Common/font.ttf", 28)
 
     def increment(self):
         self.score += 1
