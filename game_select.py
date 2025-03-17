@@ -11,14 +11,14 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 pygame.display.set_caption("EfreiSport - Menu") # Title
 # Top left icon
-pygame_icon = pygame.image.load('assets/logo.png')
+pygame_icon = pygame.image.load('assets/Common/logo.png')
 pygame.display.set_icon(pygame_icon)
 
 
 # Assets loads
-bg = pygame.image.load("assets/Background.png") # Background
-play_button = pygame.image.load("assets/play_button.png") # Play button
-font = pygame.font.Font("../ProjetTransverse/assets/font.ttf", 36) # Main font
+bg = pygame.image.load("assets/Common/Background.png") # Background
+play_button = pygame.image.load("assets/Common/play_button.png") # Play button
+font = pygame.font.Font("assets/Common/font.ttf", 36) # Main font
 
 # Initialize Colors
 red=(255,0,0)

@@ -1,22 +1,21 @@
-import pygame, json, math
+import pygame, math
 from utility import *
 
-# ---------- Resource Caching ----------
+# Load images only once
 IMAGE_CACHE = {}
 def load_image(path):
     if path not in IMAGE_CACHE:
         IMAGE_CACHE[path] = pygame.image.load(path).convert_alpha()
     return IMAGE_CACHE[path]
 
-# ---------- Initialization & Global Setup ----------
 pygame.init()
 pygame.mixer.init()
 
 WIDTH, HEIGHT = 1000, 500
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Golf")
-BG = load_image("assets/Background.png")
-ICON = load_image("assets/logo.png")
+BG = load_image("assets/Common/Background.png")
+ICON = load_image("assets/Common/logo.png")
 pygame.display.set_icon(ICON)
 
 
@@ -30,15 +29,14 @@ GREEN = (148, 186, 134)
 BUNKER_YELLOW = (237, 225, 141)
 WATER_BLUE = (0, 167, 250)
 
-# Global game state variables
 display_msg = False   # When True, a win/lose message is shown
 won = False
 arrow_follow = True   # Controls whether the arrow follows the mouse
 
-# We'll keep border walls in a dedicated list.
+# list of borders
 border_walls = []
 
-# ---------- Level Handling Functions ----------
+# Level Handling Functions
 def getlevel():
     """Read and return the level number from the save file."""
     filename = "saves/golflevel.json"
@@ -52,6 +50,16 @@ def updatelevel(levelnumber):
     filename = "saves/golflevel.json"
     dico = loadfile(filename)
     dico["level"] = levelnumber
+    with open(filename, "w") as file:
+        json.dump(dico, file)
+    soundeffect_save.play()
+    print("Updated level",levelnumber)
+
+def updatescore(levelnumber,score):
+    """Update the score of the current level."""
+    filename = "saves/golflevel.json"
+    dico = loadfile(filename)
+    dico[str(levelnumber)] = score
     with open(filename, "w") as file:
         json.dump(dico, file)
 
@@ -71,9 +79,8 @@ def lose():
     message.draw("lose")
     end_level()
 
-# ---------- Render Static Background ----------
+# Render Static Background
 def render_static_background(level):
-    """Pre-render static background elements into an offscreen surface."""
     static_bg = pygame.Surface((WIDTH, HEIGHT))
     static_bg.fill((240, 240, 240))
     static_bg.blit(BG, (0, 0))
@@ -89,7 +96,7 @@ def render_static_background(level):
     level.hole.draw(static_bg)
     return static_bg
 
-# ---------- Game Object Classes ----------
+# Game Object Classes
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -413,30 +420,32 @@ class Level(pygame.sprite.Sprite):
             self.level_walls.append(Wall(700, 300, 6, 150, False))
             self.level_bunkers.append(Bunker(getrelativepos((450,250)), 200, 100))
             self.level_water.append(Water(getrelativepos((750,375)), 250, 125))
-        # Combine persistent border walls with level-specific walls
+        # Combine border walls with level-specific walls
         self.all_walls = border_walls + self.level_walls
 
 class Score(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.score = 0
-        self.font = pygame.font.Font("assets/font.ttf", 28)
+        self.shots=0
+        self.font = pygame.font.Font("assets/Common/font.ttf", 28)
 
     def increment(self):
-        if self.score < 5:
-            self.score += 1
-
+        if self.shots < 5:
+            self.shots += 1
+        self.score=6-self.shots
     def reset(self):
+        self.shots = 0
         self.score = 0
 
     def draw(self, surface=SCREEN):
-        text = self.font.render(f"Shots: {self.score}", True, BLUE_EFREI)
+        text = self.font.render(f"Shots: {self.shots}", True, BLUE_EFREI)
         surface.blit(text, (10, 10))
 
 class Message(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.font = pygame.font.Font("assets/font.ttf", 28)
+        self.font = pygame.font.Font("assets/Common/font.ttf", 28)
         self.fontcolor = BLUE_EFREI
         self.button_width = 150
         self.button_height = 50
@@ -446,10 +455,10 @@ class Message(pygame.sprite.Sprite):
 
     def draw(self, msg_type, surface=SCREEN):
         if msg_type == "win":
-            if score.score == 1:
-                msg = "You scored a Hole-in-one! Congratulations!"
+            if score.shots == 1:
+                msg = f"You scored a Hole-in-one! Congratulations! You scored {score.score}/5 points."
             else:
-                msg = f"You won in {score.score} shots!"
+                msg = f"You won in {score.shots} shots! You scored {score.score}/5 points."
             button_msg = "Next level"
         elif msg_type == "lose":
             msg = "You didn't succeed to score in 5 shots. You lost!"
@@ -457,13 +466,21 @@ class Message(pygame.sprite.Sprite):
         else:
             msg = "Message not defined"
             button_msg = "OK"
+
+        #Draw
         text = self.font.render(msg, True, BLACK)
         text_width, text_height = text.get_size()
-        button_text = self.font.render(button_msg, True, BLACK)
         surface.blit(text, (surface.get_width() / 2 - text_width / 2, surface.get_height() / 2 - text_height / 2))
         pygame.draw.rect(surface, BLACK, self.button_rect.inflate(6, 6))
         pygame.draw.rect(surface, self.button_color, self.button_rect)
-        surface.blit(button_text, self.button_pos)
+
+        button_text = self.font.render(button_msg, True, BLACK)
+
+        #Below is to center the text in the button
+        tbutton_width, tbutton_height = button_text.get_size()
+        tbuttonx=self.button_pos[0]+((self.button_width-tbutton_width)/2)
+        tbuttony=self.button_pos[1]+((self.button_height-tbutton_height)/2)
+        surface.blit(button_text,(tbuttonx, tbuttony)) #Draw the text
 
     def clicked(self, event):
         global display_msg, level, static_background
@@ -471,10 +488,17 @@ class Message(pygame.sprite.Sprite):
             if self.button_rect.collidepoint(event.pos):
                 if won:
                     self.button_color = GREY
+                    updatescore(level.number,score.score)
                     new_level = level.number + 1
-                    updatelevel(new_level)
-                end_level()
-                level = Level(getlevel())
+                    if new_level%5==0: # Save every 5 levels
+                        updatelevel(new_level)
+                    level.number = new_level
+                    end_level()
+                    level = Level(level.number)
+                else:
+                    end_level()
+                    level.number=getlevel()
+                    level = Level(level.number)
                 static_background = render_static_background(level)
                 display_msg = False
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -483,9 +507,9 @@ class Message(pygame.sprite.Sprite):
 class Resetbutton(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.font = pygame.font.Font("assets/font.ttf", 24)
+        self.font = pygame.font.Font("assets/Common/font.ttf", 24)
         self.fontcolor = BLUE_EFREI
-        self.text = self.font.render("Restart", True, self.fontcolor)
+        self.text = self.font.render("Go back to checkpoint", True, self.fontcolor)
         self.width, self.height = self.text.get_size()
         self.pos = (1000 - 100 - self.width, 10)
         self.color = WHITE
@@ -507,10 +531,10 @@ class Resetbutton(pygame.sprite.Sprite):
         elif event.type == pygame.MOUSEBUTTONUP:
             self.color = WHITE
 
-# ---------- Create Game Objects ----------
+# Create Game Objects
 field = Field()
 
-# Create border walls (these persist across levels)
+# Create border walls (they don't change between levels)
 bordertop = Wall(0, 0, 900, 6, True)
 borderbottom = Wall(0, 425, 900, 6, True)
 borderleft = Wall(0, 0, 6, 425, True)
@@ -526,14 +550,15 @@ message = Message()
 level = Level(getlevel())
 static_background = render_static_background(level)
 resetbutton = Resetbutton()
-soundeffect_hole=pygame.mixer.Sound("assets/Golf/sounds/hole.mp3")
-soundeffect_swing=pygame.mixer.Sound("assets/Golf/sounds/swing.mp3")
-soundeffect_collisions=pygame.mixer.Sound("assets/Golf/sounds/collisions.mp3")
+soundeffect_hole=pygame.mixer.Sound("assets/Golf/Sounds/hole.mp3")
+soundeffect_swing=pygame.mixer.Sound("assets/Golf/Sounds/swing.mp3")
+soundeffect_collisions=pygame.mixer.Sound("assets/Golf/Sounds/collisions.mp3")
+soundeffect_save=pygame.mixer.Sound("assets/Golf/Sounds/Save.mp3")
 
 clock = pygame.time.Clock()
 running = True
 
-# ---------- Main Game Loop ----------
+# Main Game Loop
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -556,7 +581,7 @@ while running:
                 message.button_color = WHITE
                 resetbutton.color = WHITE
 
-    # Blit the cached static background
+    # Blit the static background
     SCREEN.blit(static_background, (0, 0))
     score.draw()
     if not level.flag.rect.colliderect(ball.rect) or ball.velocity != 0:
@@ -583,7 +608,7 @@ while running:
             soundeffect_hole.play()
             won = True
             display_msg = True
-        elif ball.velocity == 0 and score.score == 5:
+        elif ball.velocity == 0 and score.shots == 5:
             lose()
         else:
             ball.draw()

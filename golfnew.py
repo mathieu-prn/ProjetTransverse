@@ -16,8 +16,8 @@ pygame.init()
 WIDTH, HEIGHT = 1000, 500
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Golf")
-BG = load_image("assets/Background.png")
-ICON = load_image("assets/logo.png")
+BG = load_image("assets/Common/Background.png")
+ICON = load_image("assets/Common/logo.png")
 pygame.display.set_icon(ICON)
 
 # Colors
@@ -407,7 +407,7 @@ class Score(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.score = 0
-        self.font = pygame.font.Font("assets/font.ttf", 28)
+        self.font = pygame.font.Font("assets/Common/font.ttf", 28)
 
     def increment(self):
         if self.score < 5:
@@ -423,7 +423,7 @@ class Score(pygame.sprite.Sprite):
 class Message(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.font = pygame.font.Font("assets/font.ttf", 28)
+        self.font = pygame.font.Font("assets/Common/font.ttf", 28)
         self.fontcolor = BLUE_EFREI
         self.button_width = 150
         self.button_height = 50
