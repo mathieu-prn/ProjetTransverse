@@ -118,6 +118,18 @@ class Hoop_detector(pygame.sprite.Sprite):
     def draw(self,surface):
         pygame.draw.rect(surface,self.color,(self.x, self.y, self.width, self.height))
 
+class Hoop_border(pygame.sprite.Sprite):
+    def __init__(self,x,y,width,height):
+        pygame.sprite.Sprite.__init__(self)
+        self.color=(0,0,0)
+        self.x=x
+        self.y=y
+        self.width=width
+        self.height=height
+
+    def draw(self,surface):
+        pygame.draw.rect(surface,self.color,(self.x,self.y,self.width,self.height))
+
 class Score(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -226,7 +238,10 @@ score=Score()
 slider = Slider()
 arrow = Arrow()
 launch_button = Launch()
-hoop_detector= Hoop_detector(816,220)
+hoop_detector = Hoop_detector(816,220)
+hoop_border1 = Hoop_border(925,120,25,120)
+hoop_border2 = Hoop_border(887,210,5,22)
+hoop_border3 = Hoop_border(790,210,5,22)
 bordertop=Border(0,0,900,6,True)
 borderleft=Border(0,0,6,425,True)
 borderbottom=Border(0,425,900,6,True)
@@ -276,6 +291,9 @@ while running:
     hoop.draw(screen)
     scene.draw(screen)
     score.draw(screen)
+    hoop_border1.draw(screen)
+    hoop_border2.draw(screen)
+    hoop_border3.draw(screen)
     # Update the display
     pygame.display.flip()
     # Set the frame rate
