@@ -149,7 +149,7 @@ class DiagonalWall:
         self.start = getrelativepos(start_pos)
         self.end = getrelativepos(end_pos)
         self.color = BLUE_EFREI
-        self.width = 6  # visual width for drawing
+        self.width = 7  # visual width for drawing
 
     def draw(self, surface=SCREEN):
         pygame.draw.line(surface, self.color, self.start, self.end, self.width)
@@ -485,6 +485,12 @@ class Level(pygame.sprite.Sprite):
             self.level_dwalls.append(DiagonalWall((375, 2), (475, 200)))
             self.level_walls.append(Wall(650, 212, 6, 150, False))
             self.level_bunkers.append(Bunker(getrelativepos((600,375)), 200, 100))
+        elif self.number == 16:
+            self.level_walls.append(Wall(150,125,6,250,False))
+            self.level_dwalls.append(DiagonalWall((150, 425), (250, 335)))
+            self.level_walls.append(Wall(250, 264, 6, 325, False))
+            self.level_dwalls.append(DiagonalWall((300, 0), (400, 100)))
+            self.level_walls.append(Wall(350, 300, 6, 250, False))
         # Combine border walls with level-specific walls
         self.all_walls = border_walls + self.level_walls
 
