@@ -1,1 +1,5 @@
-Wave pattern by Dmitry Kovalev from <a href="https://thenounproject.com/browse/icons/term/wave-pattern/" target="_blank" title="Wave pattern Icons">Noun Project</a> (CC BY 3.0)
+# EfreiSports - the new addictive mini sports game
+## - Golf (almost finished)
+## - Basket (coming soon)
+## - Soccer (under development)
+## and more...
