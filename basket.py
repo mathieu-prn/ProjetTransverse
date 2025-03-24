@@ -129,7 +129,7 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.color=(0, 0, 0)
         self.x=x
         self.y=y
-        self.width=50
+        self.width=15
         self.height=5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.image.fill(self.color)
@@ -258,7 +258,7 @@ score=Score()
 slider = Slider()
 arrow = Arrow()
 launch_button = Launch()
-hoop_detector = Hoop_detector(816,220)
+hoop_detector = Hoop_detector(830,220)
 
 
 bordertop = Wall(0, 0, 900, 6, True)
