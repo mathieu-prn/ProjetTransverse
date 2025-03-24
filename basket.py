@@ -63,7 +63,7 @@ class Ball(pygame.sprite.Sprite):
 
     def collision(self, walls_list):
         for wall in walls_list:
-            if self.rect.inflate(5, 5).colliderect(wall.rect):
+            if self.rect.inflate(1, 1).colliderect(wall.rect):
                 dx = min(abs(self.rect.right - wall.rect.left), abs(self.rect.left - wall.rect.right))
                 dy = min(abs(self.rect.bottom - wall.rect.top), abs(self.rect.top - wall.rect.bottom))
                 if dx < dy:  # Vertical collision
@@ -261,15 +261,16 @@ slider = Slider()
 arrow = Arrow()
 launch_button = Launch()
 hoop_detector = Hoop_detector(816,220)
-hoop_border1 = Hoop_border(925,120,25,120)
-hoop_border2 = Hoop_border(887,210,5,22)
-hoop_border3 = Hoop_border(790,210,5,22)
+
 
 bordertop = Wall(0, 0, 900, 6, True)
 borderbottom = Wall(0, 425, 900, 6, True)
 borderleft = Wall(0, 0, 6, 425, True)
 borderright = Wall(900, 0, 6, 431, True)
-border_walls = [bordertop, borderbottom, borderleft, borderright]
+hoop_border1 = Wall(857,125,25,120, False)
+hoop_border2 = Wall(815,167,5,22, False)
+hoop_border3 = Wall(710,167,5,22, False)
+border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1, hoop_border2, hoop_border3]
 
 # Create the scene and add the walls
 scene = Scene()
@@ -286,26 +287,22 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             arrow.follow = not arrow.follow
-        launch_button.clicked(event)
+        if not ball.launched:
+            launch_button.clicked(event)
 
 
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg, (0, 0))
 
-    #if ball.wall_collision() and ball.time > 5*dt:
-     #   print(ball.x_coeff, ball.y_coeff)
-      #  print(bounce_coeff*ball.velocity)
-       # ball.trajectory_equation(bounce_coeff,(ball.wall_collision()-1)*math.pi/2 + ball.angle, ball.rect.center[0], ball.rect.center[1])
-        #print(ball.x_coeff, ball.y_coeff)
-    print(ball.velocity)
     if ball.velocity>0 and ball.time > dt:
+        print(ball.velocity)
         ball.collision(border_walls)
+        print(ball.velocity)
         if ball.velocity < 10:
             ball.velocity = 0
             ball.x_coeff = (0, ball.rect.centerx)
             ball.y_coeff = (0, 0, ball.rect.centery)
         ball.unstuck()
-    print(ball.x_coeff, ball.y_coeff)
 
     if ball.launched:
         ball.update_pos()
