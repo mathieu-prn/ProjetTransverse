@@ -79,6 +79,51 @@ def lose():
     message.draw("lose")
     end_level()
 
+def reflect_velocity(vx, vy, x1, y1, x2, y2):
+    # Wall vector
+    wall_dx = x2 - x1
+    wall_dy = y2 - y1
+    wall_length = math.hypot(wall_dx, wall_dy)
+    wall_dx /= wall_length
+    wall_dy /= wall_length
+
+    # Normal vector (perpendicular)
+    normal_x = -wall_dy
+    normal_y = wall_dx
+
+    # Dot product of velocity and normal
+    dot = vx * normal_x + vy * normal_y
+
+    # Reflect velocity across the normal
+    rvx = vx - 2 * dot * normal_x
+    rvy = vy - 2 * dot * normal_y
+
+    return rvx, rvy
+
+def point_line_distance(px, py, x1, y1, x2, y2):
+    # Closest point on line segment to (px, py)
+    A = px - x1
+    B = py - y1
+    C = x2 - x1
+    D = y2 - y1
+
+    dot = A * C + B * D
+    len_sq = C * C + D * D
+    param = dot / len_sq if len_sq != 0 else -1
+
+    if param < 0:
+        xx, yy = x1, y1
+    elif param > 1:
+        xx, yy = x2, y2
+    else:
+        xx = x1 + param * C
+        yy = y1 + param * D
+
+    dx = px - xx
+    dy = py - yy
+    return math.hypot(dx, dy), (xx, yy)
+
+
 # Render Static Background
 def render_static_background(level):
     static_bg = pygame.Surface((WIDTH, HEIGHT))
@@ -91,12 +136,24 @@ def render_static_background(level):
         water.draw(static_bg)
     for wall in level.level_walls:
         wall.draw(static_bg)
+    for dwall in level.level_dwalls:
+        dwall.draw(static_bg)
     for wall in border_walls:
         wall.draw(static_bg)
     level.hole.draw(static_bg)
     return static_bg
 
 # Game Object Classes
+class DiagonalWall:
+    def __init__(self, start_pos, end_pos):
+        self.start = getrelativepos(start_pos)
+        self.end = getrelativepos(end_pos)
+        self.color = BLUE_EFREI
+        self.width = 6  # visual width for drawing
+
+    def draw(self, surface=SCREEN):
+        pygame.draw.line(surface, self.color, self.start, self.end, self.width)
+
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -109,10 +166,11 @@ class Ball(pygame.sprite.Sprite):
     def draw(self, surface=SCREEN):
         surface.blit(self.image, self.rect)
 
-    def collision(self, walls_list, water_list):
+    def collision(self, walls_list, water_list, dwalls_list):
         # Check collision with water first.
         for water in water_list:
             if self.rect.colliderect(water.rect):
+                soundeffect_water.play()
                 self.velocity = 0
                 self.rect.center = getrelativepos((25, 212.5))
         # Then check collision with walls.
@@ -133,6 +191,22 @@ class Ball(pygame.sprite.Sprite):
                 self.velocity *= 0.9  # Energy loss on bounce
                 soundeffect_collisions.play()
                 return True
+        for wall in dwalls_list:
+            dist, closest_point = point_line_distance(self.rect.centerx, self.rect.centery,
+                                                      *wall.start, *wall.end)
+            if dist < 10:
+                vx = self.velocity * math.cos(self.angle)
+                vy = self.velocity * math.sin(self.angle)
+
+                rvx, rvy = reflect_velocity(vx, vy, *wall.start, *wall.end)
+
+                self.angle = math.atan2(rvy, rvx)
+                self.rect.centerx += rvx * 0.5
+                self.rect.centery += rvy * 0.5
+                self.velocity *= 0.9
+                soundeffect_collisions.play()
+                return True
+
         return False
 
     def unstuck(self):
@@ -310,7 +384,8 @@ class Level(pygame.sprite.Sprite):
         self.number = number
         self.level_walls = []    # Level-specific walls
         self.level_bunkers = []  # Level-specific bunkers
-        self.level_water = []    # Level-specific water elements
+        self.level_water = []  # Level-specific water elements
+        self.level_dwalls= []
         self.hole = Hole(getrelativepos((850, 212.5)))
         self.flag = Flag(getrelativepos((850, 212.5)))
 
@@ -387,39 +462,29 @@ class Level(pygame.sprite.Sprite):
             self.level_walls.append(Wall(700, 425-75/2, 6, 75, False))
 
         elif self.number == 12:
-            self.hole = Hole(getrelativepos((850,400)))
-            self.flag = Flag(getrelativepos((850,400)))
-            self.level_walls.append(Wall(300, 212.5, 6, 250, False))
-            self.level_walls.append(Wall(700, 100, 6, 200, False))
-            self.level_walls.append(Wall(500, 300, 6, 200, False))
-            self.level_bunkers.append(Bunker(getrelativepos((400,100)), 200, 100))
-            self.level_water.append(Water(getrelativepos((600,375)), 250, 125))
+            self.hole = Hole(getrelativepos((850, 212.5)))
+            self.flag = Flag(getrelativepos((850, 212.5)))
+            self.level_water.append(Water(getrelativepos((450,212)), 450, 212))
 
         elif self.number == 13:
-            self.hole = Hole(getrelativepos((850,50)))
-            self.flag = Flag(getrelativepos((850,50)))
-            self.level_walls.append(Wall(500, 250, 6, 300, False))
-            self.level_walls.append(Wall(250, 100, 6, 200, False))
-            self.level_walls.append(Wall(750, 300, 6, 150, False))
-            self.level_bunkers.append(Bunker(getrelativepos((600,350)), 250, 100))
-            self.level_water.append(Water(getrelativepos((400,200)), 200, 100))
+            self.level_bunkers.append(Bunker(getrelativepos((300,125)), 200, 100))
+            self.level_bunkers.append(Bunker(getrelativepos((300, 300)), 200, 100))
+            self.level_water.append(Water(getrelativepos((600,212)), 200, 100))
 
         elif self.number == 14:
-            self.hole = Hole(getrelativepos((850,250)))
-            self.flag = Flag(getrelativepos((850,250)))
-            self.level_walls.append(Wall(500, 150, 6, 200, False))
-            self.level_walls.append(Wall(700, 350, 6, 200, False))
-            self.level_bunkers.append(Bunker(getrelativepos((350,350)), 200, 100))
-            self.level_water.append(Water(getrelativepos((600,100)), 250, 100))
+            self.level_walls.append(Wall(200, 212.5, 6, 300, False))
+            self.level_water.append(Water(getrelativepos((500, 75)), 250, 150))
+            self.level_water.append(Water(getrelativepos((500, 350)), 250, 150))
 
         elif self.number == 15:
-            self.hole = Hole(getrelativepos((850,75)))
-            self.flag = Flag(getrelativepos((850,75)))
-            self.level_walls.append(Wall(250, 212.5, 6, 250, False))
-            self.level_walls.append(Wall(600, 100, 6, 200, False))
-            self.level_walls.append(Wall(700, 300, 6, 150, False))
-            self.level_bunkers.append(Bunker(getrelativepos((450,250)), 200, 100))
-            self.level_water.append(Water(getrelativepos((750,375)), 250, 125))
+            self.level_walls.append(Wall(200, 150, 6, 300, False))
+            self.level_dwalls.append(DiagonalWall((350, 425), (375, 375)))
+            self.level_walls.append(Wall(375, 302, 6, 150, False))
+            self.level_water.append(Water(getrelativepos((250, 75)), 100, 150))
+            self.level_dwalls.append(DiagonalWall((375, 227), (400, 177)))
+            self.level_dwalls.append(DiagonalWall((375, 2), (475, 200)))
+            self.level_walls.append(Wall(650, 212, 6, 150, False))
+            self.level_bunkers.append(Bunker(getrelativepos((600,375)), 200, 100))
         # Combine border walls with level-specific walls
         self.all_walls = border_walls + self.level_walls
 
@@ -491,6 +556,7 @@ class Message(pygame.sprite.Sprite):
                     self.button_color = GREY
                     updatescore(level.number,score.score)
                     new_level = level.number + 1
+                    print(new_level)
                     if new_level%5==0: # Save every 5 levels
                         updatelevel(new_level)
                     level.number = new_level
@@ -553,10 +619,13 @@ level = Level(getlevel())
 static_background = render_static_background(level)
 resetbutton = Resetbutton()
 
+
+
 #Define sound effects
 soundeffect_hole=pygame.mixer.Sound("assets/Golf/Sounds/hole.mp3")
 soundeffect_swing=pygame.mixer.Sound("assets/Golf/Sounds/swing.mp3")
 soundeffect_collisions=pygame.mixer.Sound("assets/Golf/Sounds/collisions.mp3")
+soundeffect_water=pygame.mixer.Sound("assets/Golf/Sounds/water.mp3")
 soundeffect_save=pygame.mixer.Sound("assets/Golf/Sounds/save.mp3")
 soundeffect_clicked=pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
 
@@ -599,7 +668,7 @@ while running:
             message.draw("lose")
     else:
         if ball.velocity > 0:
-            ball.collision(level.all_walls, level.level_water)
+            ball.collision(level.all_walls, level.level_water,level.level_dwalls)
             ball.unstuck()
             ball.update_position(False)
         else:
