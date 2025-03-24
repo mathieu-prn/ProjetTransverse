@@ -12,7 +12,9 @@ pygame.display.set_caption("EfreiSport - Football")
 bg = pygame.image.load("assets/Common/Background.png")
 pygame_icon = pygame.image.load('assets/Common/logo.png')
 logo = pygame.image.load('assets/Football/Logo_Penalty.png')
+
 pygame.display.set_icon(pygame_icon)
+
 
 # Initialize Colors
 black = (0, 0, 0)
@@ -40,9 +42,11 @@ class Field(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.rect = pygame.Rect(35, 50, 936, 430)
+        self.image = pygame.transform.scale((pygame.image.load('assets/Football/Logo_Penalty.png')), (100, 50))
 
     def draw(self, surface=screen):
         pygame.draw.rect(surface, grey, self.rect)
+        #surface.blit(self.image, self.rect)
 
 class Wall(pygame.sprite.Sprite):
     def __init__(self, relative_x, relative_y, width, height, is_border):
@@ -90,6 +94,7 @@ def render_static_background(level):
     static_bg.fill((240, 240, 240))
     static_bg.blit(bg, (0, 0))
     field.draw(static_bg)
+    screen.blit((pygame.image.load('assets/Football/Logo_Penalty.png')), (100,40.28))
     for wall in level.level_walls:
         wall.draw(static_bg)
     for wall in border_walls:
