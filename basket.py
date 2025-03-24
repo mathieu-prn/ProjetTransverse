@@ -31,7 +31,7 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         img = pygame.image.load("assets/Basket/BasketBall.png")
-        self.image = pygame.transform.scale(img, (50, 50))
+        self.image = pygame.transform.scale(img, (45, 45))
         self.rect = self.image.get_rect()
         self.rect.center = (150, 400)
         self.scored=False
@@ -123,7 +123,6 @@ class Wall(pygame.sprite.Sprite):
     def draw(self, surface=screen):
         pygame.draw.rect(surface, self.color, self.rect)
 
-
 class Hoop_detector(pygame.sprite.Sprite):
     def __init__(self, x,y):
         pygame.sprite.Sprite.__init__(self)
@@ -167,7 +166,6 @@ class Score(pygame.sprite.Sprite):
     def draw(self, surface=screen):
         text = self.font.render(f"Points: {self.score}", True, blue_efrei)
         surface.blit(text, (10, 10))
-
 
 #Associate all the different rectangles of the Hoop
 class Scene:
@@ -268,8 +266,8 @@ borderbottom = Wall(0, 425, 900, 6, True)
 borderleft = Wall(0, 0, 6, 425, True)
 borderright = Wall(900, 0, 6, 431, True)
 hoop_border1 = Wall(857,125,25,120, False)
-hoop_border2 = Wall(815,167,5,22, False)
-hoop_border3 = Wall(710,167,5,22, False)
+hoop_border2 = Wall(815,167,2,22, False)
+hoop_border3 = Wall(705,167,2,22, False)
 border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1, hoop_border2, hoop_border3]
 
 # Create the scene and add the walls
@@ -319,9 +317,7 @@ while running:
     hoop.draw(screen)
     scene.draw(screen)
     score.draw(screen)
-    hoop_border1.draw(screen)
-    hoop_border2.draw(screen)
-    hoop_border3.draw(screen)
+
     # Update the display
     pygame.display.flip()
     # Set the frame rate
