@@ -77,7 +77,7 @@ class Ball(pygame.sprite.Sprite):
                     self.rect.x += 2 * math.cos(self.angle)
                     self.rect.y += 2 * math.sin(self.angle)
                 self.velocity *= bounce_coeff
-                if self.velocity < 2 and self.rect.bottom > borderbottom.rect.top:
+                if self.velocity < 2:
                     self.velocity = 0
                     self.x_coeff = (0, ball.rect.centerx)
                     self.y_coeff = (0, 0, ball.rect.centery)
@@ -90,18 +90,12 @@ class Ball(pygame.sprite.Sprite):
 
     def unstuck(self, change):
         if self.rect.right > borderright.rect.left:
-            print("Too right")
             self.rect.center = (self.rect.center[0] - change, self.rect.center[1])
         elif self.rect.left < borderleft.rect.right:
-            print("Too left")
             self.rect.center = (self.rect.center[0] + change, self.rect.center[1])
         elif self.rect.bottom > borderbottom.rect.top:
-            print("Too bottom")
-            print(self.rect.center)
             self.rect.center = (self.rect.center[0], self.rect.center[1] - change)
-            print(self.rect.center)
         elif self.rect.top < bordertop.rect.bottom:
-            print("Too top")
             self.rect.center = (self.rect.center[0], self.rect.center[1] + change)
 
 
