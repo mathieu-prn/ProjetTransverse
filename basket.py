@@ -67,7 +67,7 @@ class Ball(pygame.sprite.Sprite):
                 dx = min(abs(self.rect.right - wall.rect.left), abs(self.rect.left - wall.rect.right))
                 dy = min(abs(self.rect.bottom - wall.rect.top), abs(self.rect.top - wall.rect.bottom))
                 if dx < dy:  # Vertical collision
-                    self.angle = math.pi - self.angle
+                    self.angle = math.pi + self.angle
                     self.rect.x += 2 * math.cos(self.angle)
                 elif dy < dx:  # Horizontal collision
                     self.angle = -self.angle
@@ -77,7 +77,7 @@ class Ball(pygame.sprite.Sprite):
                     self.rect.x += 2 * math.cos(self.angle)
                     self.rect.y += 2 * math.sin(self.angle)
                 self.velocity *= bounce_coeff
-                if self.velocity < 2:
+                if self.velocity < 5:
                     self.velocity = 0
                     self.x_coeff = (0, ball.rect.centerx)
                     self.y_coeff = (0, 0, ball.rect.centery)
