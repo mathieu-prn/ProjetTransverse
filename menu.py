@@ -51,15 +51,15 @@ while running:
     pygame.draw.rect(screen,(201,201,201),(0,330,1000,176))
 
     # "Menu" Button
-    pygame.draw.rect(screen,(blue_efrei),(90,360,348,98 ),0,48) # Blue border of the button
-    pygame.draw.rect(screen, ((255, 255, 255)), (90+6, 360+6, 348-12, 98-12), 0, 48) #Fill
-    txt_menu = font.render("Menu", True, (blue_efrei)) # Load text
+    pygame.draw.rect(screen,blue_efrei,(90,360,348,98 ),0,48) # Blue border of the button
+    pygame.draw.rect(screen, (255, 255, 255), (90+6, 360+6, 348-12, 98-12), 0, 48) #Fill
+    txt_menu = font.render("Menu", True, blue_efrei) # Load text
     screen.blit(txt_menu, (202, 372)) # Display text at (202,372)
 
     # "Start" Button
-    pygame.draw.rect(screen, (blue_efrei), (564, 360, 348, 98), 0, 48) # Blue border of the button
-    pygame.draw.rect(screen, ((255, 255, 255)), (564 + 6, 360 + 6, 348 - 12, 98 - 12), 0, 48) #Fill
-    txt_start = font.render("Start", True, (blue_efrei)) # Load text
+    pygame.draw.rect(screen, blue_efrei, (564, 360, 348, 98), 0, 48) # Blue border of the button
+    pygame.draw.rect(screen, (255, 255, 255), (564 + 6, 360 + 6, 348 - 12, 98 - 12), 0, 48) #Fill
+    txt_start = font.render("Start", True, blue_efrei) # Load text
     screen.blit(txt_start, (676, 372)) # Display text at (202,372)
 
     # Usability of the page
@@ -67,7 +67,7 @@ while running:
     clicked = 0
 
     # "Menu button"
-    if (90 <= mouse_x <= 90 + 348 and 360 <= mouse_y <= 360 + 98 and clicked == 0):
+    if 90 <= mouse_x <= 90 + 348 and 360 <= mouse_y <= 360 + 98 and clicked == 0:
         if pygame.mouse.get_pressed()[0]:
             clicked = 1
             print("click")
@@ -79,7 +79,7 @@ while running:
 
 
     # "Start button"
-    if (564 <= mouse_x <= 564 + 348 and 360 <= mouse_y <= 360 + 98 and clicked == 0):
+    if 564 <= mouse_x <= 564 + 348 and 360 <= mouse_y <= 360 + 98 and clicked == 0:
         if pygame.mouse.get_pressed()[0]:
             clicked = 1
             print("click")
