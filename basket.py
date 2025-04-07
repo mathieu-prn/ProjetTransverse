@@ -155,7 +155,7 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.color=(0, 0, 0)
         self.x=x
         self.y=y
-        self.width=15
+        self.width=50
         self.height=5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.image.fill(self.color)
@@ -334,9 +334,6 @@ while running:
         slider.move()
 
     ball.hoop_collision()
-    hoop_border1.draw(screen)
-    hoop_border2.draw(screen)
-    hoop_border3.draw(screen)
     ball.draw(screen)
     hoop.draw(screen)
     scene.draw(screen)
