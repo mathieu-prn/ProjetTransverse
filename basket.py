@@ -12,6 +12,8 @@ bg = pygame.image.load("assets/Common/Background.png")
 pygame_icon = pygame.image.load('assets/Common/logo.png')
 pygame.display.set_icon(pygame_icon)
 
+actual_level = 1
+
 # Initialize Colors
 black = (0, 0, 0)
 white = (255, 255, 255)
@@ -66,7 +68,6 @@ class Ball(pygame.sprite.Sprite):
                 if not self.scored:
                     score.increment()
                     self.scored = True
-                    self.reset_position()
 
         if not self.circle_collision(hoop_detector):
             self.scored = False
@@ -277,6 +278,22 @@ class Arrow(pygame.sprite.Sprite):
                 self.direction = direction.normalize()
                 self.angle = math.atan2(self.direction.y, self.direction.x)
 
+
+class Level(pygame.sprite.Sprite):
+    def __init__(self, number):
+        super().__init__()
+        self.number = number
+        self.level_walls = []    # Level-specific walls
+
+        if self.number == 1:
+            self.level_walls.append(Wall(400, 212.5, 6, 150, False))
+
+        elif self.number == 2:
+            self.level_walls.append(Wall(150, 212.5, 6, 200, False))
+            self.level_walls.append(Wall(750, 212.5, 6, 200, False))
+
+        self.all_walls = border_walls + self.level_walls
+
 #Object initialization
 ball = Ball()
 hoop = Hoop()
@@ -295,6 +312,8 @@ hoop_border1 = Wall(857,175,25,120, False)
 hoop_border2 = Wall(825,217,2,22, False)
 hoop_border3 = Wall(705,217,2,22, False)
 border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1, hoop_border2, hoop_border3]
+
+level = Level(actual_level)
 
 # Create the scene and add the walls
 scene = Scene()
@@ -318,9 +337,10 @@ while running:
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg, (0, 0))
     if ball.velocity>0 and ball.time > dt:
-        ball.collision(border_walls)
+        ball.collision(level.all_walls)
 
-
+    for wall in level.all_walls:
+        wall.draw()
 
     if ball.launched:
         ball.update_pos()
