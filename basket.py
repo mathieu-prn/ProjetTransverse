@@ -47,7 +47,7 @@ class Ball(pygame.sprite.Sprite):
         dx = self.rect.centerx - other_sprite.rect.centerx
         dy = self.rect.centery - other_sprite.rect.centery
         distance = math.hypot(dx, dy)
-        other_radius = other_sprite.radius if hasattr(other_sprite, "radius") else min(other_sprite.rect.width, other_sprite.rect.height) // 2
+        other_radius = other_sprite.radius
         return distance < (self.radius + other_radius)
 
     def init_trajectory_equation(self, velocity, angle, x0, y0):
@@ -72,7 +72,6 @@ class Ball(pygame.sprite.Sprite):
             self.scored = False
 
     def reset_position(self):
-        time.sleep(0.5)
         # Reset ball position and state after scoring
         self.rect.center = (150, 400)
         self.velocity = 0
