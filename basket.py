@@ -8,8 +8,8 @@ WIDTH = 1000
 HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Basketball")
-bg = pygame.image.load("assets/Background.png")
-pygame_icon = pygame.image.load('assets/logo.png')
+bg = pygame.image.load("assets/Common/Background.png")
+pygame_icon = pygame.image.load('assets/Common/logo.png')
 pygame.display.set_icon(pygame_icon)
 
 # Initialize Colors
@@ -31,7 +31,7 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         img = pygame.image.load("assets/Basket/BasketBall.png")
-        self.image = pygame.transform.scale(img, (50, 50))
+        self.image = pygame.transform.scale(img, (45, 45))
         self.rect = self.image.get_rect()
         self.rect.center = (150, 400)
         self.scored=False
@@ -42,11 +42,15 @@ class Ball(pygame.sprite.Sprite):
         self.time = 0
         self.launched = False
 
-    def trajectory_equation(self, speed, angle, x0, y0):
-        v_x = speed * math.cos(angle)
-        v_y = speed * math.sin(angle)
-        self.x_coeff = (v_x, x0)
-        self.y_coeff = (0.5 * G, -v_y, y0)
+    def init_trajectory_equation(self, velocity, angle, x0, y0):
+        self.x_coeff = (math.cos(angle) * velocity, x0)
+        self.y_coeff = (0.5 * G, -math.sin(angle) * velocity, y0)
+        self.time = 0
+
+    def change_trajectory_equation(self, bounce_coeff, angle, x0, y0):
+        self.x_coeff = (self.velocity * math.cos(angle) , x0)
+        self.y_coeff = (0.5 * G, -self.velocity * math.sin(angle), y0)
+        self.time = 0
 
     def hoop_collision(self):
         if self.rect.bottom > hoop_detector.rect.top and self.velocity > 0:
@@ -57,21 +61,48 @@ class Ball(pygame.sprite.Sprite):
         if not self.rect.colliderect(hoop_detector.rect):
             self.scored = False
 
-    def wall_collision(self):
-        if self.rect.colliderect(borderbottom.rect):
-            return 1
-        elif self.rect.colliderect(borderright.rect):
-            return 2
-        elif self.rect.colliderect(bordertop.rect):
-            return 3
-        elif self.rect.colliderect(borderleft.rect):
-            return 4
-        else:
-            return False
+    def collision(self, walls_list):
+        for wall in walls_list:
+            if self.rect.inflate(1, 1).colliderect(wall.rect):
+                dx = min(abs(self.rect.right - wall.rect.left), abs(self.rect.left - wall.rect.right))
+                dy = min(abs(self.rect.bottom - wall.rect.top), abs(self.rect.top - wall.rect.bottom))
+                if dx < dy:  # Vertical collision
+                    self.angle = math.pi - self.angle
+                    self.rect.x += 2 * math.cos(self.angle)
+                elif dy < dx:  # Horizontal collision
+                    self.angle = -self.angle
+                    self.rect.y += 2 * math.sin(self.angle)
+                else:  # Corner collision
+                    self.angle += math.pi
+                    self.rect.x += 2 * math.cos(self.angle)
+                    self.rect.y += 2 * math.sin(self.angle)
+                self.velocity *= bounce_coeff
+                if self.velocity < 2:
+                    self.velocity = 0
+                    self.x_coeff = (0, ball.rect.centerx)
+                    self.y_coeff = (0, 0, ball.rect.centery)
+
+                else:
+                    self.unstuck(min(dx, dy) + 1)
+                    self.change_trajectory_equation(self.velocity, self.angle, self.rect.centerx, self.rect.centery)
+                return True
+        return False
+
+    def unstuck(self, change):
+        if self.rect.right > borderright.rect.left:
+            self.rect.center = (self.rect.center[0] - change, self.rect.center[1])
+        elif self.rect.left < borderleft.rect.right:
+            self.rect.center = (self.rect.center[0] + change, self.rect.center[1])
+        elif self.rect.bottom > borderbottom.rect.top:
+            self.rect.center = (self.rect.center[0], self.rect.center[1] - change)
+        elif self.rect.top < bordertop.rect.bottom:
+            self.rect.center = (self.rect.center[0], self.rect.center[1] + change)
+
+
 
     def update_pos(self):
         self.rect.center = self.x_coeff[0]*self.time + self.x_coeff[1], self.y_coeff[0]*(self.time**2) + self.y_coeff[1]*self.time + self.y_coeff[2]
-        self.velocity = math.sqrt((math.cos(55) * self.velocity) ** 2 + (G * self.time + math.sin(55) * self.velocity) ** 2)
+        self.velocity = math.sqrt((math.cos(self.angle) * self.velocity) ** 2 + (math.sin(self.angle) * self.velocity) ** 2)
         self.time += dt
 
     def draw(self, surface):
@@ -88,18 +119,16 @@ class Hoop(pygame.sprite.Sprite):
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
-class Border(pygame.sprite.Sprite):
-    def __init__(self,relative_x,relative_y,width,height,isborder):
-        pygame.sprite.Sprite.__init__(self)
-        self.color=blue_efrei
-        self.x=relative_x
-        self.y=relative_y
-        self.width=width
-        self.height=height
-        #If it's a border, set the left corner position.
-        if isborder:
-            self.rect=pygame.Rect(self.x+80, self.y+55, self.width, self.height)
-    def draw(self,surface):
+class Wall(pygame.sprite.Sprite):
+    def __init__(self, relative_x, relative_y, width, height, is_border):
+        super().__init__()
+        self.color = blue_efrei
+        if is_border:
+            self.rect = pygame.Rect(relative_x + 80, relative_y + 55, width, height)
+        else:
+            self.rect = pygame.Rect(relative_x + 80 - width / 2, relative_y + 55 - height / 2, width, height)
+
+    def draw(self, surface=screen):
         pygame.draw.rect(surface, self.color, self.rect)
 
 class Hoop_detector(pygame.sprite.Sprite):
@@ -108,7 +137,7 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.color=(0, 0, 0)
         self.x=x
         self.y=y
-        self.width=50
+        self.width=15
         self.height=5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.image.fill(self.color)
@@ -118,11 +147,23 @@ class Hoop_detector(pygame.sprite.Sprite):
     def draw(self,surface):
         pygame.draw.rect(surface,self.color,(self.x, self.y, self.width, self.height))
 
+class Hoop_border(pygame.sprite.Sprite):
+    def __init__(self,x,y,width,height):
+        pygame.sprite.Sprite.__init__(self)
+        self.color=(0,0,0)
+        self.x=x
+        self.y=y
+        self.width=width
+        self.height=height
+
+    def draw(self,surface):
+        pygame.draw.rect(surface,self.color,(self.x,self.y,self.width,self.height))
+
 class Score(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.score = 0
-        self.font = pygame.font.Font("assets/font.ttf", 28)
+        self.font = pygame.font.Font("assets/Common/font.ttf", 28)
 
     def increment(self):
         self.score += 1
@@ -133,7 +174,6 @@ class Score(pygame.sprite.Sprite):
     def draw(self, surface=screen):
         text = self.font.render(f"Points: {self.score}", True, blue_efrei)
         surface.blit(text, (10, 10))
-
 
 #Associate all the different rectangles of the Hoop
 class Scene:
@@ -167,7 +207,7 @@ class Slider(pygame.sprite.Sprite):
     def get_value(self):
         min_y = self.rect.top
         max_y = self.rect.bottom - self.slider_rect.height
-        return int(150 - (((self.slider_rect.y - min_y) / (max_y - min_y)) * 100)) + int(10 * ((self.slider_rect.y - min_y) / (max_y - min_y)))
+        return int(100 - (((self.slider_rect.y - min_y) / (max_y - min_y)) * 100)) + int(10 * ((self.slider_rect.y - min_y) / (max_y - min_y)))
 
 class Launch(pygame.sprite.Sprite):
     def __init__(self):
@@ -187,7 +227,7 @@ class Launch(pygame.sprite.Sprite):
             if self.rect.collidepoint(event.pos):
                 self.color = grey
                 ball.velocity = (slider.get_value()/100) * 120
-                ball.trajectory_equation(ball.velocity, ball.angle, ball.rect.center[0], ball.rect.center[1])
+                ball.init_trajectory_equation(ball.velocity, ball.angle, ball.rect.center[0], ball.rect.center[1])
                 ball.launched = True
         elif event.type == pygame.MOUSEBUTTONUP:
             self.color = white
@@ -226,11 +266,17 @@ score=Score()
 slider = Slider()
 arrow = Arrow()
 launch_button = Launch()
-hoop_detector= Hoop_detector(816,220)
-bordertop=Border(0,0,900,6,True)
-borderleft=Border(0,0,6,425,True)
-borderbottom=Border(0,425,900,6,True)
-borderright=Border(900,0,6,431,True)
+hoop_detector = Hoop_detector(830,220)
+
+
+bordertop = Wall(0, 0, 900, 6, True)
+borderbottom = Wall(0, 425, 900, 6, True)
+borderleft = Wall(0, 0, 6, 425, True)
+borderright = Wall(900, 0, 6, 431, True)
+hoop_border1 = Wall(857,125,25,120, False)
+hoop_border2 = Wall(815,167,2,22, False)
+hoop_border3 = Wall(705,167,2,22, False)
+border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1, hoop_border2, hoop_border3]
 
 # Create the scene and add the walls
 scene = Scene()
@@ -247,19 +293,16 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             arrow.follow = not arrow.follow
-        launch_button.clicked(event)
+        if not ball.launched:
+            launch_button.clicked(event)
 
 
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg, (0, 0))
+    if ball.velocity>0 and ball.time > dt:
+        ball.collision(border_walls)
 
-    if ball.wall_collision():
-        if ball.wall_collision()%2 == 0:
-            test = 1
-        else:
-            test = -1
-        ball.trajectory_equation(bounce_coeff*ball.velocity,test * (ball.wall_collision()-1)*math.pi/2 + ball.angle, ball.rect.center[0], ball.rect.center[1])
-        ball.time = dt
+
 
     if ball.launched:
         ball.update_pos()
@@ -276,6 +319,7 @@ while running:
     hoop.draw(screen)
     scene.draw(screen)
     score.draw(screen)
+
     # Update the display
     pygame.display.flip()
     # Set the frame rate
