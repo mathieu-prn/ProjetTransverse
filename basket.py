@@ -1,4 +1,4 @@
-import pygame, math
+import pygame, math, time
 
 # Initialize Pygame
 pygame.init()
@@ -72,12 +72,15 @@ class Ball(pygame.sprite.Sprite):
             self.scored = False
 
     def reset_position(self):
+        time.sleep(0.5)
         # Reset ball position and state after scoring
         self.rect.center = (150, 400)
         self.velocity = 0
         self.launched = False
         self.time = 0
         self.angle = 0
+        self.x_coeff = (0, ball.rect.centerx)
+        self.y_coeff = (0, 0, ball.rect.centery)
 
     def collision(self, walls_list):
         for wall in walls_list:
@@ -96,9 +99,8 @@ class Ball(pygame.sprite.Sprite):
                     self.rect.y += 2 * math.sin(self.angle)
                 self.velocity *= bounce_coeff
                 if self.velocity < 5:
-                    self.velocity = 0
-                    self.x_coeff = (0, ball.rect.centerx)
-                    self.y_coeff = (0, 0, ball.rect.centery)
+                    self.reset_position()
+
                 else:
                     self.unstuck(min(dx, dy) + 1)
                     self.change_trajectory_equation(self.velocity, self.angle, self.rect.centerx, self.rect.centery)
