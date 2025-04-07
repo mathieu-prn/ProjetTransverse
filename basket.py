@@ -77,20 +77,28 @@ class Ball(pygame.sprite.Sprite):
                     self.rect.x += 2 * math.cos(self.angle)
                     self.rect.y += 2 * math.sin(self.angle)
                 self.velocity *= bounce_coeff
-                self.change_trajectory_equation(self.velocity, self.angle, self.rect.centerx, self.rect.centery)
+                if self.velocity < 2:
+                    self.velocity = 0
+                    self.x_coeff = (0, ball.rect.centerx)
+                    self.y_coeff = (0, 0, ball.rect.centery)
+
+                else:
+                    self.unstuck(min(dx, dy) + 1)
+                    self.change_trajectory_equation(self.velocity, self.angle, self.rect.centerx, self.rect.centery)
                 return True
         return False
 
-    def unstuck(self):
-        change = 20
-        if self.rect.left < borderright.rect.left:
-            self.rect.center = (self.rect.center[0] + change, self.rect.center[1])
-        elif self.rect.right > borderleft.rect.right:
+    def unstuck(self, change):
+        if self.rect.right > borderright.rect.left:
             self.rect.center = (self.rect.center[0] - change, self.rect.center[1])
-        elif self.rect.top < borderbottom.rect.top:
-            self.rect.center = (self.rect.center[0], self.rect.center[1] + change)
-        elif self.rect.bottom > bordertop.rect.bottom:
+        elif self.rect.left < borderleft.rect.right:
+            self.rect.center = (self.rect.center[0] + change, self.rect.center[1])
+        elif self.rect.bottom > borderbottom.rect.top:
             self.rect.center = (self.rect.center[0], self.rect.center[1] - change)
+        elif self.rect.top < bordertop.rect.bottom:
+            self.rect.center = (self.rect.center[0], self.rect.center[1] + change)
+
+
 
     def update_pos(self):
         self.rect.center = self.x_coeff[0]*self.time + self.x_coeff[1], self.y_coeff[0]*(self.time**2) + self.y_coeff[1]*self.time + self.y_coeff[2]
@@ -291,16 +299,10 @@ while running:
 
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg, (0, 0))
-
     if ball.velocity>0 and ball.time > dt:
-        print(ball.velocity)
         ball.collision(border_walls)
-        print(ball.velocity)
-        if ball.velocity < 10:
-            ball.velocity = 0
-            ball.x_coeff = (0, ball.rect.centerx)
-            ball.y_coeff = (0, 0, ball.rect.centery)
-        ball.unstuck()
+
+
 
     if ball.launched:
         ball.update_pos()
