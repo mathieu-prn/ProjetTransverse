@@ -1,8 +1,9 @@
 import pygame
+print("menu.py ran")
+import game_select as gameselect
 
 # Initialize Pygame
-print(pygame.init())
-
+pygame.init()
 # Set up the game window
 # Size
 WIDTH = 1000
@@ -16,7 +17,7 @@ pygame.display.set_icon(pygame_icon)
 
 
 # Assets loads
-bg = pygame.image.load("assets/Common/Background.png") # Background
+BG = pygame.image.load("assets/Common/Background.png") # Background
 logo_long = pygame.image.load("assets/Common/Logo long EFREI sport.png") # Logo
 font = pygame.font.Font("assets/Common/font.ttf", 48) # Main font
 
@@ -38,7 +39,7 @@ while running:
 
     # Overlay "efrei sport"
     screen.fill((240,240,240, 0.5))
-    screen.blit(bg,(0, 0))
+    screen.blit(BG,(0, 0))
 
     # Logo top right
     screen.blit(logo_long, (345, 32))
@@ -53,8 +54,8 @@ while running:
     # "Menu" Button
     pygame.draw.rect(screen,(blue_efrei),(90,360,348,98 ),0,48) # Blue border of the button
     pygame.draw.rect(screen, ((255, 255, 255)), (90+6, 360+6, 348-12, 98-12), 0, 48) #Fill
-    txt_menu = font.render("Menu", True, (blue_efrei)) # Load text
-    screen.blit(txt_menu, (202, 372)) # Display text at (202,372)
+    txt_menu = font.render("Settings", True, (blue_efrei)) # Load text
+    screen.blit(txt_menu, (167, 372)) # Display text at (202,372)
 
     # "Start" Button
     pygame.draw.rect(screen, (blue_efrei), (564, 360, 348, 98), 0, 48) # Blue border of the button
@@ -81,15 +82,13 @@ while running:
     # "Start button"
     if (564 <= mouse_x <= 564 + 348 and 360 <= mouse_y <= 360 + 98 and clicked == 0):
         if pygame.mouse.get_pressed()[0]:
-            clicked = 1
-            print("click")
-            screen.fill((240, 240, 240, 0.5))
-            pygame.display.flip()
+            print("Start button clicked")
+            pygame.time.wait(200)  # Avoid multiple clicks
+            gameselect.run(screen,BG,font) #RUN GAME_SELECT
+            # Re-initialize the menu display after returning from game_select
         if clicked > 0:
             screen.fill((240, 240, 240, 0.5))
             pygame.display.flip()
-
-
 
     # Update the display
     pygame.display.flip()
