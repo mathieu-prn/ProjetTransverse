@@ -1,4 +1,6 @@
-import pygame, math
+import pygame, math, time
+import utility
+from utility import getrelativepos
 
 # Initialize Pygame
 pygame.init()
@@ -9,8 +11,11 @@ HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Basketball")
 bg = pygame.image.load("assets/Common/Background.png")
+windowbg = pygame.transform.scale(pygame.image.load("assets/Basket/bg.png"), (900, 425))
 pygame_icon = pygame.image.load('assets/Common/logo.png')
 pygame.display.set_icon(pygame_icon)
+
+actual_level = 1
 
 # Initialize Colors
 black = (0, 0, 0)
@@ -34,13 +39,21 @@ class Ball(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(img, (45, 45))
         self.rect = self.image.get_rect()
         self.rect.center = (150, 400)
-        self.scored=False
+        self.scored = False
         self.velocity = 0
         self.angle = 0
         self.x_coeff = (0, self.rect.center[0])
         self.y_coeff = (0, 0, self.rect.center[1])
         self.time = 0
+        self.radius = self.rect.width // 2
         self.launched = False
+
+    def circle_collision(self, other_sprite):
+        dx = self.rect.centerx - other_sprite.rect.centerx
+        dy = self.rect.centery - other_sprite.rect.centery
+        distance = math.hypot(dx, dy)
+        other_radius = other_sprite.radius
+        return distance < (self.radius + other_radius)
 
     def init_trajectory_equation(self, velocity, angle, x0, y0):
         self.x_coeff = (math.cos(angle) * velocity, x0)
@@ -48,18 +61,29 @@ class Ball(pygame.sprite.Sprite):
         self.time = 0
 
     def change_trajectory_equation(self, bounce_coeff, angle, x0, y0):
-        self.x_coeff = (self.velocity * math.cos(angle) , x0)
+        self.x_coeff = (self.velocity * math.cos(angle), x0)
         self.y_coeff = (0.5 * G, -self.velocity * math.sin(angle), y0)
         self.time = 0
 
     def hoop_collision(self):
         if self.rect.bottom > hoop_detector.rect.top and self.velocity > 0:
-            if self.rect.colliderect(hoop_detector.rect):
+            if self.circle_collision(hoop_detector):
                 if not self.scored:
                     score.increment()
                     self.scored = True
-        if not self.rect.colliderect(hoop_detector.rect):
+
+        if not self.circle_collision(hoop_detector):
             self.scored = False
+
+    def reset_position(self):
+        # Reset ball position and state after scoring
+        self.rect.center = (150, 400)
+        self.velocity = 0
+        self.launched = False
+        self.time = 0
+        self.angle = 0
+        self.x_coeff = (0, ball.rect.centerx)
+        self.y_coeff = (0, 0, ball.rect.centery)
 
     def collision(self, walls_list):
         for wall in walls_list:
@@ -67,7 +91,7 @@ class Ball(pygame.sprite.Sprite):
                 dx = min(abs(self.rect.right - wall.rect.left), abs(self.rect.left - wall.rect.right))
                 dy = min(abs(self.rect.bottom - wall.rect.top), abs(self.rect.top - wall.rect.bottom))
                 if dx < dy:  # Vertical collision
-                    self.angle = math.pi - self.angle
+                    self.angle = math.pi + self.angle
                     self.rect.x += 2 * math.cos(self.angle)
                 elif dy < dx:  # Horizontal collision
                     self.angle = -self.angle
@@ -77,10 +101,8 @@ class Ball(pygame.sprite.Sprite):
                     self.rect.x += 2 * math.cos(self.angle)
                     self.rect.y += 2 * math.sin(self.angle)
                 self.velocity *= bounce_coeff
-                if self.velocity < 2:
-                    self.velocity = 0
-                    self.x_coeff = (0, ball.rect.centerx)
-                    self.y_coeff = (0, 0, ball.rect.centery)
+                if self.velocity < 5:
+                    self.reset_position()
 
                 else:
                     self.unstuck(min(dx, dy) + 1)
@@ -98,15 +120,14 @@ class Ball(pygame.sprite.Sprite):
         elif self.rect.top < bordertop.rect.bottom:
             self.rect.center = (self.rect.center[0], self.rect.center[1] + change)
 
-
-
     def update_pos(self):
-        self.rect.center = self.x_coeff[0]*self.time + self.x_coeff[1], self.y_coeff[0]*(self.time**2) + self.y_coeff[1]*self.time + self.y_coeff[2]
+        self.rect.center = self.x_coeff[0] * self.time + self.x_coeff[1], self.y_coeff[0] * (self.time**2) + self.y_coeff[1] * self.time + self.y_coeff[2]
         self.velocity = math.sqrt((math.cos(self.angle) * self.velocity) ** 2 + (math.sin(self.angle) * self.velocity) ** 2)
         self.time += dt
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+
 
 class Hoop(pygame.sprite.Sprite):
     def __init__(self):
@@ -114,7 +135,7 @@ class Hoop(pygame.sprite.Sprite):
         img = pygame.image.load("assets/Basket/wall_net.png")
         self.image = pygame.transform.scale(img,(200,164))
         self.rect = self.image.get_rect()
-        self.rect.center = (885,200)
+        self.rect.center = (885,250)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -137,12 +158,13 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.color=(0, 0, 0)
         self.x=x
         self.y=y
-        self.width=15
+        self.width=50
         self.height=5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.image.fill(self.color)
         self.rect=self.image.get_rect()
         self.rect.center= (x,y)
+        self.radius = min(self.width, self.height) // 2
 
     def draw(self,surface):
         pygame.draw.rect(surface,self.color,(self.x, self.y, self.width, self.height))
@@ -259,6 +281,22 @@ class Arrow(pygame.sprite.Sprite):
                 self.direction = direction.normalize()
                 self.angle = math.atan2(self.direction.y, self.direction.x)
 
+
+class Level(pygame.sprite.Sprite):
+    def __init__(self, number):
+        super().__init__()
+        self.number = number
+        self.level_walls = []    # Level-specific walls
+
+        if self.number == 1:
+            self.level_walls.append(Wall(400, 212.5, 6, 150, False))
+
+        elif self.number == 2:
+            self.level_walls.append(Wall(150, 212.5, 6, 200, False))
+            self.level_walls.append(Wall(750, 212.5, 6, 200, False))
+
+        self.all_walls = border_walls + self.level_walls
+
 #Object initialization
 ball = Ball()
 hoop = Hoop()
@@ -266,17 +304,19 @@ score=Score()
 slider = Slider()
 arrow = Arrow()
 launch_button = Launch()
-hoop_detector = Hoop_detector(830,220)
+hoop_detector = Hoop_detector(830,270)
 
 
 bordertop = Wall(0, 0, 900, 6, True)
 borderbottom = Wall(0, 425, 900, 6, True)
 borderleft = Wall(0, 0, 6, 425, True)
 borderright = Wall(900, 0, 6, 431, True)
-hoop_border1 = Wall(857,125,25,120, False)
-hoop_border2 = Wall(815,167,2,22, False)
-hoop_border3 = Wall(705,167,2,22, False)
+hoop_border1 = Wall(857,175,25,120, False)
+hoop_border2 = Wall(825,217,2,22, False)
+hoop_border3 = Wall(705,217,2,22, False)
 border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1, hoop_border2, hoop_border3]
+
+level = Level(actual_level)
 
 # Create the scene and add the walls
 scene = Scene()
@@ -299,10 +339,13 @@ while running:
 
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg, (0, 0))
+    screen.blit(windowbg,getrelativepos((0,0)))
+
     if ball.velocity>0 and ball.time > dt:
-        ball.collision(border_walls)
+        ball.collision(level.all_walls)
 
-
+    for wall in level.all_walls:
+        wall.draw()
 
     if ball.launched:
         ball.update_pos()
