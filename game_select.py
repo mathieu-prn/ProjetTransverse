@@ -1,4 +1,6 @@
-import pygame
+import pygame, config, golf as golf
+
+SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
 def round_image_corners(image, radius):
     size = image.get_size()
@@ -16,10 +18,11 @@ def round_image_corners(image, radius):
 
     return rounded_image
 
-def run(screen, bg, font):
+def run(FONT,BG):
     pygame.display.set_caption("EfreiSport - Game select")
     play_button = pygame.image.load("assets/Common/play_button.png")
     golf_preview = pygame.transform.scale(pygame.image.load("assets/Menu/golf_preview.png"),(530,298))
+    game=None
     blue_efrei = (18, 121, 190)
     preview=None
 
@@ -45,42 +48,49 @@ def run(screen, bg, font):
                     if rect.collidepoint(mouse_pos):
                         print(f"{name} button clicked!")
                         game=name
-                        preview="golf"
+                        if game == "Golf":
+                            preview="golf"
+                        elif game == "Foot":
+                            preview="foot"
+                        else:
+                            preview="basket"
                         # You can call corresponding game functions here
-                        # Example: if name == "Golf": golf.run(screen, bg, font)
+                        # Example: if name == "Golf": golf.run(SCREEN, BG, FONT)
                 if play_rect.collidepoint(mouse_pos):
                     if game=="Golf":
-                        pass
+                        golf.run()
 
 
         # Draw background
-        screen.fill((240, 240, 240))
-        screen.blit(bg, (0, 0))
+        SCREEN.fill((240, 240, 240))
+        SCREEN.blit(BG, (0, 0))
 
         # Draw buttons
         for i, (name, rect) in enumerate(buttons.items()):
-            pygame.draw.rect(screen, blue_efrei, rect, border_radius=44)
-            pygame.draw.rect(screen, (255, 255, 255), rect.inflate(-8, -8), border_radius=44)
-            text_surface = font.render(name, True, blue_efrei)
+            pygame.draw.rect(SCREEN, blue_efrei, rect, border_radius=44)
+            pygame.draw.rect(SCREEN, (255, 255, 255), rect.inflate(-8, -8), border_radius=44)
+            text_surface = FONT.render(name, True, blue_efrei)
             text_rect = text_surface.get_rect(center=rect.center)
-            screen.blit(text_surface, text_rect)
+            SCREEN.blit(text_surface, text_rect)
 
         # Photo jeu section
-        pygame.draw.rect(screen, blue_efrei, (398, 16, 534, 302), border_radius=24)
+        pygame.draw.rect(SCREEN, blue_efrei, (398, 16, 534, 302), border_radius=24)
         if not preview:
-            pygame.draw.rect(screen, (234, 234, 234), (400, 18, 530, 298), border_radius=24)
-        elif preview=="golf":
-            im_preview=round_image_corners(golf_preview, 24)
-            screen.blit(im_preview, (400, 18))
+            pygame.draw.rect(SCREEN, (234, 234, 234), (400, 18, 530, 298), border_radius=24)
+        else:
+            im_preview=round_image_corners(BG, 24)
+            if preview=="golf":
+                im_preview=round_image_corners(golf_preview, 24)
+            SCREEN.blit(im_preview, (400, 18))
 
         # Historic button
-        pygame.draw.rect(screen, blue_efrei, (398, 332, 160, 160), border_radius=24)
-        pygame.draw.rect(screen, (234, 234, 234), (400, 334, 156, 156), border_radius=24)
+        pygame.draw.rect(SCREEN, blue_efrei, (398, 332, 160, 160), border_radius=24)
+        pygame.draw.rect(SCREEN, (234, 234, 234), (400, 334, 156, 156), border_radius=24)
 
         # Play button
-        pygame.draw.rect(screen, blue_efrei, (772, 332, 160, 160), border_radius=24)
-        pygame.draw.rect(screen, (234, 234, 234), (774, 334, 156, 156), border_radius=24)
-        screen.blit(play_button, (824, 376))
+        pygame.draw.rect(SCREEN, blue_efrei, (772, 332, 160, 160), border_radius=24)
+        pygame.draw.rect(SCREEN, (234, 234, 234), (774, 334, 156, 156), border_radius=24)
+        SCREEN.blit(play_button, (824, 376))
 
         pygame.display.flip()
         clock.tick(60)

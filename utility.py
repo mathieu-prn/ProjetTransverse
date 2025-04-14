@@ -8,3 +8,4 @@ def getrelativepos(pos):
 def loadfile(file):
     '''Loads json files'''
     return json.load(open(file))
+

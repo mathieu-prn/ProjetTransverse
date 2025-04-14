@@ -1,4 +1,6 @@
 import pygame, math
+import utility
+from utility import getrelativepos
 
 # Initialize Pygame
 pygame.init()
@@ -9,6 +11,7 @@ HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Basketball")
 bg = pygame.image.load("assets/Common/Background.png")
+windowbg = pygame.transform.scale(pygame.image.load("assets/Basket/bg.png"), (900, 425))
 pygame_icon = pygame.image.load('assets/Common/logo.png')
 pygame.display.set_icon(pygame_icon)
 
@@ -291,6 +294,7 @@ while running:
 
     screen.fill((240, 240, 240, 0.5))
     screen.blit(bg, (0, 0))
+    screen.blit(windowbg,getrelativepos((0,0)))
 
     if ball.velocity>0 and ball.time > dt:
         print(ball.velocity)
