@@ -21,12 +21,13 @@ def round_image_corners(image, radius):
 def run(FONT,BG):
     pygame.display.set_caption("EfreiSport - Game select")
     play_button = pygame.image.load("assets/Common/play_button.png")
+    lb_button_image = pygame.transform.scale(pygame.image.load("assets/Common/lb_button.png"),(100,100))  # leaderboard button
+    #previews
     golf_preview = pygame.transform.scale(pygame.image.load("assets/Menu/golf_preview.png"),(530,298))
-    game=None
-    blue_efrei = (18, 121, 190)
-    preview=None
+    basket_preview = pygame.transform.scale(pygame.image.load("assets/Menu/basket_preview.png"),(530,298))
 
-    clock = pygame.time.Clock()
+    game=None
+    preview=None
 
     # Button setup
     buttons = {
@@ -34,7 +35,24 @@ def run(FONT,BG):
         "Golf": pygame.Rect(48, 156, 232, 78),
         "Foot": pygame.Rect(48, 264, 232, 78),
     }
-    play_rect=pygame.Rect(772, 332, 160, 160)
+    play_rect = pygame.Rect(772, 332, 160, 160)
+    GREY=(234, 234, 234)
+
+    class Lb_button():
+        def __init__(self):
+            super().__init__()
+            self.borderrect = pygame.rect.Rect(398, 332, 160, 160)
+            self.rect = pygame.rect.Rect(400, 334, 156, 156)
+        def draw(self):
+            pygame.draw.rect(SCREEN, config.BLUE_EFREI, self.borderrect, border_radius=24)
+            pygame.draw.rect(SCREEN, GREY, self.rect, border_radius=24)
+            if preview == "golf":
+                SCREEN.blit(lb_button_image, (430, 365))
+
+    #Define game objects
+    lb_button = Lb_button()
+
+    clock = pygame.time.Clock()
 
     running = True
     while running:
@@ -67,29 +85,32 @@ def run(FONT,BG):
 
         # Draw buttons
         for i, (name, rect) in enumerate(buttons.items()):
-            pygame.draw.rect(SCREEN, blue_efrei, rect, border_radius=44)
+            pygame.draw.rect(SCREEN, config.BLUE_EFREI, rect, border_radius=44)
             pygame.draw.rect(SCREEN, (255, 255, 255), rect.inflate(-8, -8), border_radius=44)
-            text_surface = FONT.render(name, True, blue_efrei)
+            text_surface = FONT.render(name, True, config.BLUE_EFREI)
             text_rect = text_surface.get_rect(center=rect.center)
             SCREEN.blit(text_surface, text_rect)
 
         # Photo jeu section
-        pygame.draw.rect(SCREEN, blue_efrei, (398, 16, 534, 302), border_radius=24)
+        pygame.draw.rect(SCREEN, config.BLUE_EFREI, (398, 16, 534, 302), border_radius=24)
         if not preview:
-            pygame.draw.rect(SCREEN, (234, 234, 234), (400, 18, 530, 298), border_radius=24)
+            pygame.draw.rect(SCREEN, GREY, (400, 18, 530, 298), border_radius=24)
         else:
             im_preview=round_image_corners(BG, 24)
             if preview=="golf":
                 im_preview=round_image_corners(golf_preview, 24)
+            elif preview=="basket":
+                im_preview=round_image_corners(basket_preview, 24)
+            elif preview=="foot":
+                pass
             SCREEN.blit(im_preview, (400, 18))
 
         # Historic button
-        pygame.draw.rect(SCREEN, blue_efrei, (398, 332, 160, 160), border_radius=24)
-        pygame.draw.rect(SCREEN, (234, 234, 234), (400, 334, 156, 156), border_radius=24)
+        lb_button.draw()
 
         # Play button
-        pygame.draw.rect(SCREEN, blue_efrei, (772, 332, 160, 160), border_radius=24)
-        pygame.draw.rect(SCREEN, (234, 234, 234), (774, 334, 156, 156), border_radius=24)
+        pygame.draw.rect(SCREEN, config.BLUE_EFREI, (772, 332, 160, 160), border_radius=24)
+        pygame.draw.rect(SCREEN, GREY, (774, 334, 156, 156), border_radius=24)
         SCREEN.blit(play_button, (824, 376))
 
         pygame.display.flip()

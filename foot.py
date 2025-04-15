@@ -1,5 +1,6 @@
 import pygame
 from utility import *
+import config
 
 # Initialize Pygame
 pygame.init()
