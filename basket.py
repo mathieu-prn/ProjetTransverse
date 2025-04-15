@@ -1,3 +1,5 @@
+from trace import Trace
+
 import pygame, math, time
 import utility
 from utility import getrelativepos
@@ -72,8 +74,6 @@ class Ball(pygame.sprite.Sprite):
                     score.increment()
                     self.scored = True
 
-        if not self.circle_collision(hoop_detector):
-            self.scored = False
 
     def reset_position(self):
         # Reset ball position and state after scoring
@@ -82,6 +82,7 @@ class Ball(pygame.sprite.Sprite):
         self.launched = False
         self.time = 0
         self.angle = 0
+        self.scored = False
         self.x_coeff = (0, ball.rect.centerx)
         self.y_coeff = (0, 0, ball.rect.centery)
 
@@ -141,16 +142,18 @@ class Hoop(pygame.sprite.Sprite):
         surface.blit(self.image, self.rect)
 
 class Wall(pygame.sprite.Sprite):
-    def __init__(self, relative_x, relative_y, width, height, is_border):
+    def __init__(self, relative_x, relative_y, width, height, is_border, visible):
         super().__init__()
         self.color = blue_efrei
+        self.visible = visible
         if is_border:
             self.rect = pygame.Rect(relative_x + 80, relative_y + 55, width, height)
         else:
             self.rect = pygame.Rect(relative_x + 80 - width / 2, relative_y + 55 - height / 2, width, height)
 
     def draw(self, surface=screen):
-        pygame.draw.rect(surface, self.color, self.rect)
+        if self.visible:
+            pygame.draw.rect(surface, self.color, self.rect)
 
 class Hoop_detector(pygame.sprite.Sprite):
     def __init__(self, x,y):
@@ -158,7 +161,7 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.color=(0, 0, 0)
         self.x=x
         self.y=y
-        self.width=50
+        self.width=85
         self.height=5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.image.fill(self.color)
@@ -166,8 +169,9 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.rect.center= (x,y)
         self.radius = min(self.width, self.height) // 2
 
-    def draw(self,surface):
-        pygame.draw.rect(surface,self.color,(self.x, self.y, self.width, self.height))
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, self.rect)
+
 
 class Hoop_border(pygame.sprite.Sprite):
     def __init__(self,x,y,width,height):
@@ -281,7 +285,6 @@ class Arrow(pygame.sprite.Sprite):
                 self.direction = direction.normalize()
                 self.angle = math.atan2(self.direction.y, self.direction.x)
 
-
 class Level(pygame.sprite.Sprite):
     def __init__(self, number):
         super().__init__()
@@ -289,11 +292,13 @@ class Level(pygame.sprite.Sprite):
         self.level_walls = []    # Level-specific walls
 
         if self.number == 1:
-            self.level_walls.append(Wall(400, 212.5, 6, 150, False))
+            enable_middle_wall = False
+            if enable_middle_wall:
+                self.level_walls.append(Wall(400, 212.5, 6, 150, False, True))
 
         elif self.number == 2:
-            self.level_walls.append(Wall(150, 212.5, 6, 200, False))
-            self.level_walls.append(Wall(750, 212.5, 6, 200, False))
+            self.level_walls.append(Wall(150, 212.5, 6, 200, False, True))
+            self.level_walls.append(Wall(750, 212.5, 6, 200, False, True))
 
         self.all_walls = border_walls + self.level_walls
 
@@ -304,16 +309,16 @@ score=Score()
 slider = Slider()
 arrow = Arrow()
 launch_button = Launch()
-hoop_detector = Hoop_detector(830,270)
+hoop_detector = Hoop_detector(840,270)
 
 
-bordertop = Wall(0, 0, 900, 6, True)
-borderbottom = Wall(0, 425, 900, 6, True)
-borderleft = Wall(0, 0, 6, 425, True)
-borderright = Wall(900, 0, 6, 431, True)
-hoop_border1 = Wall(857,175,25,120, False)
-hoop_border2 = Wall(825,217,2,22, False)
-hoop_border3 = Wall(705,217,2,22, False)
+bordertop = Wall(0, 0, 900, 6, True, True)
+borderbottom = Wall(0, 425, 900, 6, True, True)
+borderleft = Wall(0, 0, 6, 425, True, True)
+borderright = Wall(900, 0, 6, 431, True, True)
+hoop_border1 = Wall(857,175,25,120, False,False)
+hoop_border2 = Wall(825,217,2,22, False, False)
+hoop_border3 = Wall(705,217,2,22, False, False)
 border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1, hoop_border2, hoop_border3]
 
 level = Level(actual_level)
