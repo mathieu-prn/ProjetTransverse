@@ -318,7 +318,8 @@ borderright = Wall(900, 0, 6, 431, True, True)
 hoop_border1 = Wall(857,175,25,120, False,False)
 hoop_border2 = Wall(825,217,2,22, False, False)
 hoop_border3 = Wall(705,217,2,22, False, False)
-border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1, hoop_border2, hoop_border3]
+hoop_walls = [hoop_border2, hoop_border3]
+border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1]
 
 level = Level(actual_level)
 
@@ -347,6 +348,8 @@ while running:
 
     if ball.velocity>0 and ball.time > dt:
         ball.collision(level.all_walls)
+        if not ball.scored:
+            ball.collision(hoop_walls)
 
     for wall in level.all_walls:
         wall.draw()
