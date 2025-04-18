@@ -91,34 +91,33 @@ class Ball(pygame.sprite.Sprite):
             if self.rect.inflate(1, 1).colliderect(wall.rect):
                 dx = min(abs(self.rect.right - wall.rect.left), abs(self.rect.left - wall.rect.right))
                 dy = min(abs(self.rect.bottom - wall.rect.top), abs(self.rect.top - wall.rect.bottom))
+                ldiff = self.rect.left - wall.rect.right
+                rdiff = self.rect.right - wall.rect.left
+                bdiff = self.rect.bottom - wall.rect.top
+                tdiff =  self.rect.top - wall.rect.bottom
                 if dx < dy:  # Vertical collision
                     self.angle = math.pi + self.angle
-                    self.rect.x += 2 * math.cos(self.angle)
                 elif dy < dx:  # Horizontal collision
                     self.angle = -self.angle
-                    self.rect.y += 2 * math.sin(self.angle)
                 else:  # Corner collision
                     self.angle += math.pi
-                    self.rect.x += 2 * math.cos(self.angle)
-                    self.rect.y += 2 * math.sin(self.angle)
                 self.velocity *= bounce_coeff
                 if self.velocity < 5:
                     self.reset_position()
-
                 else:
-                    self.unstuck(min(dx, dy) + 1)
+                    self.unstuck(min(dx, dy) + 1, ldiff, rdiff, bdiff, tdiff, dx, dy, wall)
                     self.change_trajectory_equation(self.velocity, self.angle, self.rect.centerx, self.rect.centery)
                 return True
         return False
 
-    def unstuck(self, change):
-        if self.rect.right > borderright.rect.left:
+    def unstuck(self, change, ld, rd, bd, td, dx, dy, wall):
+        if self.rect.right > wall.rect.left and dx<=dy and abs(rd)<abs(ld):
             self.rect.center = (self.rect.center[0] - change, self.rect.center[1])
-        elif self.rect.left < borderleft.rect.right:
+        elif self.rect.left < wall.rect.right and dx<=dy and abs(ld)<abs(rd):
             self.rect.center = (self.rect.center[0] + change, self.rect.center[1])
-        elif self.rect.bottom > borderbottom.rect.top:
+        elif self.rect.bottom > wall.rect.top and dx>dy and abs(bd)<abs(td):
             self.rect.center = (self.rect.center[0], self.rect.center[1] - change)
-        elif self.rect.top < bordertop.rect.bottom:
+        elif self.rect.top < wall.rect.bottom and dx>dy and abs(td)<abs(bd):
             self.rect.center = (self.rect.center[0], self.rect.center[1] + change)
 
     def update_pos(self):
