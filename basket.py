@@ -95,14 +95,12 @@ class Ball(pygame.sprite.Sprite):
                 rdiff = self.rect.right - wall.rect.left
                 bdiff = self.rect.bottom - wall.rect.top
                 tdiff =  self.rect.top - wall.rect.bottom
-                if dx < dy:  # Vertical collision
+                if dx <= dy:  # Vertical collision
                     self.angle = math.pi + self.angle
                 elif dy < dx:  # Horizontal collision
                     self.angle = -self.angle
-                else:  # Corner collision
-                    self.angle += math.pi
                 self.velocity *= bounce_coeff
-                if self.velocity < 5:
+                if self.velocity < 5 and self.rect.bottom >= borderbottom.rect.top - 5:
                     self.reset_position()
                 else:
                     self.unstuck(min(dx, dy) + 1, ldiff, rdiff, bdiff, tdiff, dx, dy, wall)
@@ -351,7 +349,7 @@ while running:
         if not ball.scored:
             ball.collision(hoop_walls)
 
-    for wall in level.all_walls:
+    for wall in level.all_walls + hoop_walls:
         wall.draw()
 
     if ball.launched:
