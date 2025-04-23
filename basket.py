@@ -1,6 +1,8 @@
 from trace import Trace
 
 import pygame, math, time
+from pyexpat.errors import messages
+
 import utility
 from utility import getrelativepos
 
@@ -31,6 +33,11 @@ G = 9.81
 dt = 1/10
 PI = math.pi
 bounce_coeff = 0.7
+
+#Initialize sounds
+soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
+soundeffect_bounce = pygame.mixer.Sound("assets/Basket/Sounds/bounce.mp3")
+soundeffect_inthebasket = pygame.mixer.Sound("assets/Basket/Sounds/inthebasket.mp3")
 
 clock = pygame.time.Clock()
 
@@ -72,6 +79,7 @@ class Ball(pygame.sprite.Sprite):
             if self.circle_collision(hoop_detector):
                 if not self.scored:
                     score.increment()
+                    soundeffect_inthebasket.play()
                     self.scored = True
 
 
@@ -82,13 +90,16 @@ class Ball(pygame.sprite.Sprite):
         self.launched = False
         self.time = 0
         self.angle = 0
-        self.scored = False
         self.x_coeff = (0, ball.rect.centerx)
         self.y_coeff = (0, 0, ball.rect.centery)
 
     def collision(self, walls_list):
         for wall in walls_list:
             if self.rect.inflate(1, 1).colliderect(wall.rect):
+                if not ball.scored:
+                    score.bounces += 1
+                if self.velocity > 5 and self.time > 0.2:
+                    soundeffect_bounce.play()
                 dx = min(abs(self.rect.right - wall.rect.left), abs(self.rect.left - wall.rect.right))
                 dy = min(abs(self.rect.bottom - wall.rect.top), abs(self.rect.top - wall.rect.bottom))
                 ldiff = self.rect.left - wall.rect.right
@@ -100,7 +111,7 @@ class Ball(pygame.sprite.Sprite):
                 elif dy < dx:  # Horizontal collision
                     self.angle = -self.angle
                 self.velocity *= bounce_coeff
-                if self.velocity < 5 and self.rect.bottom >= borderbottom.rect.top - 5:
+                if self.velocity < 5 and ball.rect.bottom > borderbottom.rect.top - 5 and not ball.scored:
                     self.reset_position()
                 else:
                     self.unstuck(min(dx, dy) + 1, ldiff, rdiff, bdiff, tdiff, dx, dy, wall)
@@ -158,7 +169,7 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.color=(0, 0, 0)
         self.x=x
         self.y=y
-        self.width=85
+        self.width=100
         self.height=5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.image.fill(self.color)
@@ -186,10 +197,20 @@ class Score(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.score = 0
+        self.bounces = 0
+        self.new_score = 0
         self.font = pygame.font.Font("assets/Common/font.ttf", 28)
 
     def increment(self):
-        self.score += 1
+        if self.bounces == 0:
+            self.new_score = 10
+        elif self.bounces == 1:
+            self.new_score = 5
+        elif 2<=self.bounces<=4:
+            self.new_score = 3
+        else:
+            self.new_score = 1
+        self.score += self.new_score
 
     def reset(self):
         self.score = 0
@@ -248,6 +269,7 @@ class Launch(pygame.sprite.Sprite):
     def clicked(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
+                soundeffect_clicked.play()
                 self.color = grey
                 ball.velocity = (slider.get_value()/100) * 120
                 ball.init_trajectory_equation(ball.velocity, ball.angle, ball.rect.center[0], ball.rect.center[1])
@@ -289,17 +311,79 @@ class Level(pygame.sprite.Sprite):
         self.level_walls = []    # Level-specific walls
 
         if self.number == 1:
-            enable_middle_wall = False
-            if enable_middle_wall:
-                self.level_walls.append(Wall(400, 212.5, 6, 150, False, True))
-
+            pass
         elif self.number == 2:
-            self.level_walls.append(Wall(150, 212.5, 6, 200, False, True))
-            self.level_walls.append(Wall(750, 212.5, 6, 200, False, True))
+            self.level_walls.append(Wall(400, 212.5, 6, 100, False, True))
+        elif self.number == 3:
+            self.level_walls.append(Wall(400, 50, 6, 100, False, True))
+            self.level_walls.append(Wall(400, 300, 6, 250, False, True))
+        elif self.number == 4:
+            self.level_walls.append(Wall(500, 150, 100, 6, False, True))
+            self.level_walls.append(Wall(650, 200, 100, 6, False, True))
 
         self.all_walls = border_walls + self.level_walls
 
+
 #Object initialization
+
+class Message(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.font = pygame.font.Font("assets/Common/font.ttf", 28)
+        self.fontcolor = blue_efrei
+        self.button_width = 150
+        self.button_height = 50
+        self.button_pos = (500 - self.button_width / 2, 275)
+        self.button_color = white
+        self.button_rect = pygame.Rect(self.button_pos, (self.button_width, self.button_height))
+
+    def draw(self, msg_type, surface=screen):
+        if msg_type == "win":
+            if score.bounces == 0:
+                msg = f"You scored without any bounce! Congratulations! You scored {score.new_score}/10 points."
+            else:
+                msg = f"You won in {score.bounces} bounces! You scored {score.new_score}/10 points."
+            button_msg = "Next level"
+        elif msg_type == "lose":
+            msg = "You didn't succeed to score in 5 shots. You lost!"
+            button_msg = "Try again"
+        else:
+            msg = "Message not defined"
+            button_msg = "OK"
+
+        #Draw
+        text = self.font.render(msg, True, black)
+        text_width, text_height = text.get_size()
+        surface.blit(text, (surface.get_width() / 2 - text_width / 2, surface.get_height() / 2 - text_height / 2))
+        pygame.draw.rect(surface, black, self.button_rect.inflate(6, 6))
+        pygame.draw.rect(surface, self.button_color, self.button_rect)
+
+        button_text = self.font.render(button_msg, True, black)
+
+        #Below is to center the text in the button
+        tbutton_width, tbutton_height = button_text.get_size()
+        tbuttonx=self.button_pos[0]+((self.button_width-tbutton_width)/2)
+        tbuttony=self.button_pos[1]+((self.button_height-tbutton_height)/2)
+        surface.blit(button_text,(tbuttonx, tbuttony)) #Draw the text
+
+    def clicked(self, event):
+        global display_msg
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.button_rect.collidepoint(event.pos):
+                soundeffect_clicked.play()
+                if ball.scored:
+                    level.number += 1
+                    ball.reset_position()
+                    ball.scored = False
+                    score.bounces = 0
+                    score.new_score = 0
+                else:
+                    pass
+                display_msg = False
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.button_color = white
+
+
 ball = Ball()
 hoop = Hoop()
 score=Score()
@@ -320,6 +404,7 @@ hoop_walls = [hoop_border2, hoop_border3]
 border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1]
 
 level = Level(actual_level)
+message = Message()
 
 # Create the scene and add the walls
 scene = Scene()
@@ -331,6 +416,7 @@ scene.add_object(borderbottom)
 # Game loop
 running = True
 while running:
+    level = Level(level.number)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -338,6 +424,8 @@ while running:
             arrow.follow = not arrow.follow
         if not ball.launched:
             launch_button.clicked(event)
+        if ball.scored:
+            message.clicked(event)
 
 
     screen.fill((240, 240, 240, 0.5))
@@ -367,6 +455,8 @@ while running:
     hoop.draw(screen)
     scene.draw(screen)
     score.draw(screen)
+    if ball.scored:
+        message.draw("win")
 
     # Update the display
     pygame.display.flip()
