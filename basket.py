@@ -57,13 +57,6 @@ class Ball(pygame.sprite.Sprite):
         self.radius = self.rect.width // 2
         self.launched = False
 
-    def circle_collision(self, other_sprite):
-        dx = self.rect.centerx - other_sprite.rect.centerx
-        dy = self.rect.centery - other_sprite.rect.centery
-        distance = math.hypot(dx, dy)
-        other_radius = other_sprite.radius
-        return distance < (self.radius + other_radius)
-
     def init_trajectory_equation(self, velocity, angle, x0, y0):
         self.x_coeff = (math.cos(angle) * velocity, x0)
         self.y_coeff = (0.5 * G, -math.sin(angle) * velocity, y0)
@@ -76,7 +69,7 @@ class Ball(pygame.sprite.Sprite):
 
     def hoop_collision(self):
         if self.rect.bottom > hoop_detector.rect.top and self.velocity > 0:
-            if self.circle_collision(hoop_detector):
+            if self.rect.colliderect(hoop_detector):
                 if not self.scored:
                     score.increment()
                     soundeffect_inthebasket.play()
@@ -176,7 +169,6 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.image.fill(self.color)
         self.rect=self.image.get_rect()
         self.rect.center= (x,y)
-        self.radius = min(self.width, self.height) // 2
 
     def draw(self, surface):
         pygame.draw.rect(surface, self.color, self.rect)
