@@ -111,7 +111,8 @@ class Ball(pygame.sprite.Sprite):
                 elif dy < dx:  # Horizontal collision
                     self.angle = -self.angle
                 self.velocity *= bounce_coeff
-                if self.velocity < 5 and ball.rect.bottom > borderbottom.rect.top - 5 and not ball.scored:
+                if self.velocity < 5 and not ball.scored:
+                    time.sleep(0.5)
                     self.reset_position()
                 else:
                     self.unstuck(min(dx, dy) + 1, ldiff, rdiff, bdiff, tdiff, dx, dy, wall)
@@ -169,7 +170,7 @@ class Hoop_detector(pygame.sprite.Sprite):
         self.color=(0, 0, 0)
         self.x=x
         self.y=y
-        self.width=100
+        self.width=105
         self.height=5
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.image.fill(self.color)
@@ -390,7 +391,7 @@ score=Score()
 slider = Slider()
 arrow = Arrow()
 launch_button = Launch()
-hoop_detector = Hoop_detector(840,270)
+hoop_detector = Hoop_detector(841,270)
 
 
 bordertop = Wall(0, 0, 900, 6, True, True)
