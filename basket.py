@@ -56,6 +56,7 @@ class Ball(pygame.sprite.Sprite):
         self.time = 0
         self.radius = self.rect.width // 2
         self.launched = False
+        self.player = score1
 
     def init_trajectory_equation(self, velocity, angle, x0, y0):
         self.x_coeff = (math.cos(angle) * velocity, x0)
@@ -71,7 +72,7 @@ class Ball(pygame.sprite.Sprite):
         if self.rect.bottom > hoop_detector.rect.top and self.velocity > 0:
             if self.rect.colliderect(hoop_detector):
                 if not self.scored:
-                    score.increment()
+                    self.player.increment()
                     soundeffect_inthebasket.play()
                     self.scored = True
 
@@ -90,7 +91,7 @@ class Ball(pygame.sprite.Sprite):
         for wall in walls_list:
             if self.rect.inflate(1, 1).colliderect(wall.rect):
                 if not ball.scored:
-                    score.bounces += 1
+                    self.player.bounces += 1
                 if self.velocity > 5 and self.time > 0.2:
                     soundeffect_bounce.play()
                 dx = min(abs(self.rect.right - wall.rect.left), abs(self.rect.left - wall.rect.right))
@@ -187,20 +188,28 @@ class Hoop_border(pygame.sprite.Sprite):
         pygame.draw.rect(surface,self.color,(self.x,self.y,self.width,self.height))
 
 class Score(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, x, y, name, color):
         super().__init__()
         self.score = 0
         self.bounces = 0
         self.new_score = 0
+        self.color = color
+        self.position = (x, y)
+        self.level = 1
+        self.name = name
         self.font = pygame.font.Font("assets/Common/font.ttf", 28)
 
     def increment(self):
         if self.bounces == 0:
             self.new_score = 10
         elif self.bounces == 1:
-            self.new_score = 5
+            self.new_score = 8
         elif 2<=self.bounces<=4:
+            self.new_score = 5
+        elif 5<=self.bounces<=10:
             self.new_score = 3
+        elif 11<=self.bounces<=20:
+            self.new_score = 2
         else:
             self.new_score = 1
         self.score += self.new_score
@@ -209,8 +218,20 @@ class Score(pygame.sprite.Sprite):
         self.score = 0
 
     def draw(self, surface=screen):
-        text = self.font.render(f"Points: {self.score}", True, blue_efrei)
-        surface.blit(text, (10, 10))
+        text = self.font.render(f"Points: {self.score}", True, self.color)
+        surface.blit(text, self.position)
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, name, color):
+        super().__init__()
+        self.name = name
+        self.color = color
+        self.position = (400, 10)
+        self.font = pygame.font.Font("assets/Common/font.ttf", 28)
+
+    def draw(self, surface=screen):
+        text = self.font.render(f"{self.name}'s turn", True, self.color)
+        surface.blit(text, self.position)
 
 #Associate all the different rectangles of the Hoop
 class Scene:
@@ -316,7 +337,6 @@ class Level(pygame.sprite.Sprite):
 
         self.all_walls = border_walls + self.level_walls
 
-
 #Object initialization
 
 class Message(pygame.sprite.Sprite):
@@ -331,21 +351,22 @@ class Message(pygame.sprite.Sprite):
         self.button_rect = pygame.Rect(self.button_pos, (self.button_width, self.button_height))
 
     def draw(self, msg_type, surface=screen):
-        if msg_type == "win":
-            if score.bounces == 0:
-                msg = f"You scored without any bounce! Congratulations! You scored {score.new_score}/10 points."
+        self.fontcolor = ball.player.color
+        if msg_type == "next":
+            if ball.player.bounces == 0:
+                msg = f"You scored without any bounce! Congratulations! You scored {ball.player.new_score}/10 points."
             else:
-                msg = f"You won in {score.bounces} bounces! You scored {score.new_score}/10 points."
-            button_msg = "Next level"
-        elif msg_type == "lose":
-            msg = "You didn't succeed to score in 5 shots. You lost!"
-            button_msg = "Try again"
+                msg = f"You won in {ball.player.bounces} bounces! You scored {ball.player.new_score}/10 points."
+            button_msg = "Next player"
+        elif msg_type == "end":
+            msg = f"Congratulations! You finished all the levels.\nFinal scores:\nPlayer 1:{score1.score}\nPlayer 2:{score2.score}"
+            button_msg = "Ok"
         else:
             msg = "Message not defined"
             button_msg = "OK"
 
         #Draw
-        text = self.font.render(msg, True, black)
+        text = self.font.render(msg, True, self.fontcolor)
         text_width, text_height = text.get_size()
         surface.blit(text, (surface.get_width() / 2 - text_width / 2, surface.get_height() / 2 - text_height / 2))
         pygame.draw.rect(surface, black, self.button_rect.inflate(6, 6))
@@ -365,11 +386,15 @@ class Message(pygame.sprite.Sprite):
             if self.button_rect.collidepoint(event.pos):
                 soundeffect_clicked.play()
                 if ball.scored:
-                    level.number += 1
+                    ball.player.level += 1
                     ball.reset_position()
                     ball.scored = False
-                    score.bounces = 0
-                    score.new_score = 0
+                    ball.player.bounces = 0
+                    ball.player.new_score = 0
+                    if ball.player == score1:
+                        ball.player = score2
+                    else:
+                        ball.player = score1
                 else:
                     pass
                 display_msg = False
@@ -377,9 +402,10 @@ class Message(pygame.sprite.Sprite):
             self.button_color = white
 
 
+score1=Score(10, 10, "Player 1", blue_efrei)
+score2=Score(850, 10, "PLayer 2", red)
 ball = Ball()
 hoop = Hoop()
-score=Score()
 slider = Slider()
 arrow = Arrow()
 launch_button = Launch()
@@ -396,8 +422,9 @@ hoop_border3 = Wall(705,217,2,22, False, False)
 hoop_walls = [hoop_border2, hoop_border3]
 border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1]
 
-level = Level(actual_level)
+level = Level(score1.level)
 message = Message()
+player = Player(score1.name, score1.color)
 
 # Create the scene and add the walls
 scene = Scene()
@@ -409,7 +436,8 @@ scene.add_object(borderbottom)
 # Game loop
 running = True
 while running:
-    level = Level(level.number)
+    level = Level(ball.player.level)
+    player = Player(ball.player.name, ball.player.color)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -447,9 +475,14 @@ while running:
     ball.draw(screen)
     hoop.draw(screen)
     scene.draw(screen)
-    score.draw(screen)
+    score1.draw(screen)
+    score2.draw(screen)
+    player.draw()
     if ball.scored:
-        message.draw("win")
+        if score1.level>=4 and score2.level>=4:
+            message.draw("end")
+        else:
+            message.draw("next")
 
     # Update the display
     pygame.display.flip()
