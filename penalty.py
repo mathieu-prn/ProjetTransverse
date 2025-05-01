@@ -46,6 +46,17 @@ goal_y = 72
 angle = 0
 rotation_speed = 2  # Vitesse de rotation
 
+# État du jeu
+game_over = False
+
+# Fonction pour réinitialiser le jeu
+def reset_game():
+    global game_over, ball_rect, target_position, angle
+    game_over = False
+    ball_rect.topleft = (475, 415)
+    target_position = ball_rect.center
+    angle = 0
+
 # Game loop
 running = True
 while running:
@@ -54,7 +65,12 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Clic gauche de la souris
-                target_position = event.pos
+                if game_over:
+                    # Vérifier si le bouton "Recommencer" est cliqué
+                    if 400 <= event.pos[0] <= 600 and 225 <= event.pos[1] <= 275:
+                        reset_game()
+                else:
+                    target_position = event.pos
 
     # Design of the page
     screen.fill((240, 240, 240, 0.5))
@@ -71,37 +87,54 @@ while running:
 
     pygame.draw.circle(screen, blue_efrei, (500, 440), 25)  # Penalty point
 
-    # Calculer la direction vers la position cible
-    dx = target_position[0] - ball_rect.centerx
-    dy = target_position[1] - ball_rect.centery
-    distance = math.hypot(dx, dy)
+    if not game_over:
+        # Calculer la direction vers la position cible
+        dx = target_position[0] - ball_rect.centerx
+        dy = target_position[1] - ball_rect.centery
+        distance = math.hypot(dx, dy)
 
-    if distance > v:
-        # Normaliser le vecteur de direction
-        dx /= distance
-        dy /= distance
+        if distance > v:
+            # Normaliser le vecteur de direction
+            dx /= distance
+            dy /= distance
 
-        # Mettre à jour la position de la balle
-        ball_rect.centerx += dx * v
-        ball_rect.centery += dy * v
+            # Mettre à jour la position de la balle
+            ball_rect.centerx += dx * v
+            ball_rect.centery += dy * v
+        else:
+            # Si la distance est inférieure à la vitesse, positionner directement la balle à la cible
+            ball_rect.center = target_position
+
+        # Dessiner la balle à la nouvelle position
+        screen.blit(ball_image, ball_rect.topleft)
+
+        # Rotation du gardien
+        angle += rotation_speed
+        if angle >= 360:
+            angle = 0
+
+        # Rotation de l'image du gardien
+        rotated_goal = pygame.transform.rotate(goal, angle)
+        rotated_rect = rotated_goal.get_rect(center=(goal_x + goal_rect.width // 2, goal_y + goal_rect.height // 2))
+
+        # Dessiner le gardien à la nouvelle position
+        screen.blit(rotated_goal, rotated_rect.topleft)
+
+        # Vérifier la collision entre le ballon et le gardien
+        if ball_rect.colliderect(rotated_rect):
+            print("perdu")
+            game_over = True
     else:
-        # Si la distance est inférieure à la vitesse, positionner directement la balle à la cible
-        ball_rect.center = target_position
+        # Afficher "perdu" à l'écran
+        font = pygame.font.Font(None, 74)
+        text = font.render("Perdu", True, RED)
+        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2 - 50))
 
-    # Dessiner la balle à la nouvelle position
-    screen.blit(ball_image, ball_rect.topleft)
-
-    # Rotation du gardien
-    angle += rotation_speed
-    if angle >= 360:
-        angle = 0
-
-    # Rotation de l'image du gardien
-    rotated_goal = pygame.transform.rotate(goal, angle)
-    rotated_rect = rotated_goal.get_rect(center=(goal_x + goal_rect.width // 2, goal_y + goal_rect.height // 2))
-
-    # Dessiner le gardien à la nouvelle position
-    screen.blit(rotated_goal, rotated_rect.topleft)
+        # Dessiner le bouton "Recommencer"
+        pygame.draw.rect(screen, GREEN, (400, 225, 200, 50))
+        font = pygame.font.Font(None, 36)
+        text = font.render("Recommencer", True, BLACK)
+        screen.blit(text, (410, 235))
 
     # Update the display
     pygame.display.flip()
