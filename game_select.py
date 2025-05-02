@@ -18,7 +18,7 @@ def round_image_corners(image, radius):
 
     return rounded_image
 
-def run(FONT,BG):
+def run(FONT,BG): #Main function, called in the menu (menu.py)
     pygame.display.set_caption("EfreiSport - Game select")
     play_button = pygame.image.load("assets/Common/play_button.png")
     lb_button_image = pygame.transform.scale(pygame.image.load("assets/Common/lb_button.png"),(100,100))  # leaderboard button
@@ -29,14 +29,32 @@ def run(FONT,BG):
     game=None
     preview=None
 
-    # Button setup
-    buttons = {
-        "Basket": pygame.Rect(48, 48, 232, 78),
-        "Golf": pygame.Rect(48, 156, 232, 78),
-        "Foot": pygame.Rect(48, 264, 232, 78),
-    }
+    GREY = (234, 234, 234)
+
+    class button():
+        def __init__(self,name):
+            self.name = name
+            if self.name =="Basket":
+                self.rect = pygame.Rect(48, 48, 232, 78)
+            elif self.name == "Golf":
+                self.rect = pygame.Rect(48, 156, 232, 78)
+            elif self.name == "Penalty":
+                self.rect = pygame.Rect(48, 264, 232, 78)
+            elif self.name == "Exit":
+                self.rect = pygame.Rect(48, 372, 232, 78)
+        def draw(self):
+            pygame.draw.rect(SCREEN, config.BLUE_EFREI, self.rect, border_radius=44)
+            pygame.draw.rect(SCREEN, (255, 255, 255), self.rect.inflate(-8, -8), border_radius=44)
+            text_surface = FONT.render(self.name, True, config.BLUE_EFREI)
+            text_rect = text_surface.get_rect(center=self.rect.center)
+            SCREEN.blit(text_surface, text_rect)
+
+
+    class Play_button():
+        def __init__(self):
+            self.rect = pygame.Rect(772, 332, 160, 160)
+
     play_rect = pygame.Rect(772, 332, 160, 160)
-    GREY=(234, 234, 234)
 
     class Lb_button():
         def __init__(self):
@@ -52,6 +70,12 @@ def run(FONT,BG):
     #Define game objects
     lb_button = Lb_button()
 
+    basket_b = button("Basket")
+    penalty_b = button("Penalty")
+    golf_b = button("Golf")
+    exit_b = button("Exit")
+    game_buttons=[basket_b,penalty_b,golf_b,exit_b]
+
     clock = pygame.time.Clock()
 
     running = True
@@ -62,21 +86,29 @@ def run(FONT,BG):
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
-                for name, rect in buttons.items():
-                    if rect.collidepoint(mouse_pos):
-                        print(f"{name} button clicked!")
-                        game=name
+                for button in game_buttons:
+                    if button.rect.collidepoint(mouse_pos):
+                        print(f"{button.name} button clicked!")
+                        game=button.name
                         if game == "Golf":
                             preview="golf"
                         elif game == "Foot":
                             preview="foot"
-                        else:
+                        elif game=="Basket":
                             preview="basket"
-                        # You can call corresponding game functions here
-                        # Example: if name == "Golf": golf.run(SCREEN, BG, FONT)
+                        elif game=="Exit":
+                            return "Exit"
                 if play_rect.collidepoint(mouse_pos):
                     if game=="Golf":
-                        golf.run()
+                        if golf.run()=="Exit":
+                            pygame.event.clear()
+                    if game=="Basket":
+                        pass
+                    if game=="Penalty":
+                        pass
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return "Exit"
 
 
         # Draw background
@@ -84,12 +116,8 @@ def run(FONT,BG):
         SCREEN.blit(BG, (0, 0))
 
         # Draw buttons
-        for i, (name, rect) in enumerate(buttons.items()):
-            pygame.draw.rect(SCREEN, config.BLUE_EFREI, rect, border_radius=44)
-            pygame.draw.rect(SCREEN, (255, 255, 255), rect.inflate(-8, -8), border_radius=44)
-            text_surface = FONT.render(name, True, config.BLUE_EFREI)
-            text_rect = text_surface.get_rect(center=rect.center)
-            SCREEN.blit(text_surface, text_rect)
+        for button in game_buttons:
+            button.draw()
 
         # Photo jeu section
         pygame.draw.rect(SCREEN, config.BLUE_EFREI, (398, 16, 534, 302), border_radius=24)
@@ -115,5 +143,4 @@ def run(FONT,BG):
 
         pygame.display.flip()
         clock.tick(60)
-
     pygame.quit()

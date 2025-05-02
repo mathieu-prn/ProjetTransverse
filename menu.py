@@ -28,6 +28,14 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            # "Start button"
+            if (564 <= mouse_x <= 564 + 348 and 360 <= mouse_y <= 360 + 98):
+                print("Start button clicked")
+                pygame.time.wait(200)  # Avoid multiple clicks
+                if gameselect.run(FONT, BG) == "Exit":  # RUN GAME_SELECT
+                    pygame.event.clear()
+
     # Design of the page
 
     # Overlay "efrei sport"
@@ -70,15 +78,6 @@ while running:
         if clicked > 0:
             SCREEN.fill((0, 0, 0, 0.5))
             pygame.display.flip()
-
-
-    # "Start button"
-    if (564 <= mouse_x <= 564 + 348 and 360 <= mouse_y <= 360 + 98 and clicked == 0):
-        if pygame.mouse.get_pressed()[0]:
-            print("Start button clicked")
-            pygame.time.wait(200)  # Avoid multiple clicks
-            gameselect.run(FONT,BG) #RUN GAME_SELECT
-            # Re-initialize the menu display after returning from game_select
         if clicked > 0:
             SCREEN.fill((240, 240, 240, 0.5))
             pygame.display.flip()

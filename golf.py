@@ -9,37 +9,34 @@ def load_image(path):
         IMAGE_CACHE[path] = pygame.image.load(path).convert_alpha()
     return IMAGE_CACHE[path]
 
+# Initialize necessary pygame modules
 pygame.mixer.init()
 pygame.font.init()
 
-WIDTH, HEIGHT = 1000, 500
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("EfreiSport - Golf")
-BG = load_image("assets/Common/Background.png")
 
+# ---- Initialize global variables
 
+SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
+BG = load_image(config.BG)
 # Colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-BLUE_EFREI = (18, 121, 190)
-GREY = (211, 211, 211)
-GREEN = (148, 186, 134)
+GREEN_GOLF = (148, 186, 134)
 BUNKER_YELLOW = (237, 225, 141)
 WATER_BLUE = (0, 167, 250)
 
-display_msg = False  # When True, a win/lose message is shown
-won = False
-arrow_follow = True  # Controls whether the arrow follows the mouse
+DISPLAY_MSG = False  # When True, a win/lose message is shown
+WON = False
+ARROW_FOLLOW = True  # Controls whether the arrow follows the mouse or not
 
 # list of borders
-border_walls = []
+BORDER_WALLS = []
 
-def run():
-    global display_msg,won,arrow_follow,border_walls
+def run(): # Main function, called in the menu (game_select.py)
+    global DISPLAY_MSG,WON,ARROW_FOLLOW,BORDER_WALLS
     # Level Handling Functions
 
-    def get_font(size):
+    # Might move some of these to utility.py
+    def get_font(size): # Returns a pygame font of size "size"
         return pygame.font.Font(config.FONT, size)
 
     def getlevel():
@@ -70,17 +67,17 @@ def run():
 
     def end_level():
         """Reset game state for a new level."""
-        global arrow_follow
+        global ARROW_FOLLOW
         ball.velocity = 0
         score.reset()
         ball.rect.center = getrelativepos((25, 212.5))
-        arrow_follow = True
+        ARROW_FOLLOW = True
 
     def lose():
         """Handle a losing condition."""
-        global display_msg, won
-        display_msg = True
-        won = False
+        global DISPLAY_MSG, WON
+        DISPLAY_MSG = True
+        WON = False
         message.draw("lose")
         end_level()
 
@@ -131,7 +128,7 @@ def run():
 
     # Render Static Background
     def render_static_background(level):
-        static_bg = pygame.Surface((WIDTH, HEIGHT))
+        static_bg = pygame.Surface((config.WIDTH, config.HEIGHT))
         static_bg.fill((240, 240, 240))
         static_bg.blit(BG, (0, 0))
         field.draw(static_bg)
@@ -143,7 +140,7 @@ def run():
             wall.draw(static_bg)
         for dwall in level.level_dwalls:
             dwall.draw(static_bg)
-        for wall in border_walls:
+        for wall in BORDER_WALLS:
             wall.draw(static_bg)
         level.hole.draw(static_bg)
         return static_bg
@@ -153,7 +150,7 @@ def run():
         def __init__(self, start_pos, end_pos):
             self.start = getrelativepos(start_pos)
             self.end = getrelativepos(end_pos)
-            self.color = BLUE_EFREI
+            self.color = config.BLUE_EFREI
             self.width = 7  # visual width for drawing
 
         def draw(self, surface=SCREEN):
@@ -249,9 +246,9 @@ def run():
             self.dragging = False
 
         def draw(self, surface=SCREEN):
-            pygame.draw.rect(surface, BLUE_EFREI, self.rect.inflate(6, 6))
-            pygame.draw.rect(surface, WHITE, self.rect)
-            pygame.draw.rect(surface, BLACK, self.slider_rect)
+            pygame.draw.rect(surface, config.BLUE_EFREI, self.rect.inflate(6, 6))
+            pygame.draw.rect(surface, config.WHITE, self.rect)
+            pygame.draw.rect(surface, config.BLACK, self.slider_rect)
 
         def handle_event(self, event):
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -274,24 +271,24 @@ def run():
         def __init__(self):
             super().__init__()
             self.rect = pygame.Rect(17, 396, 50, 80)
-            self.color = WHITE
+            self.color = config.WHITE
 
         def draw(self, surface=SCREEN):
-            pygame.draw.rect(surface, BLUE_EFREI, self.rect.inflate(6, 6))
+            pygame.draw.rect(surface, config.BLUE_EFREI, self.rect.inflate(6, 6))
             pygame.draw.rect(surface, self.color, self.rect)
-            font = get_font(45)
-            text = font.render("Go!", True, BLUE_EFREI)
-            surface.blit(text, (self.rect.x, self.rect.y + 30))
+            font = get_font(30)
+            text = font.render("Go!", True, config.BLUE_EFREI)
+            surface.blit(text, (self.rect.x, self.rect.y + 25))
 
         def clicked(self, event):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos) and ball.velocity == 0:
                     score.increment()
-                    self.color = GREY
+                    self.color = config.GREY
                     soundeffect_swing.play()
                     ball.update_position(True)
             elif event.type == pygame.MOUSEBUTTONUP:
-                self.color = WHITE
+                self.color = config.WHITE
 
     class Field(pygame.sprite.Sprite):
         def __init__(self):
@@ -299,12 +296,12 @@ def run():
             self.rect = pygame.Rect(80, 55, 900, 425)
 
         def draw(self, surface=SCREEN):
-            pygame.draw.rect(surface, GREEN, self.rect)
+            pygame.draw.rect(surface, GREEN_GOLF, self.rect)
 
     class Wall(pygame.sprite.Sprite):
         def __init__(self, relative_x, relative_y, width, height, is_border):
             super().__init__()
-            self.color = BLUE_EFREI
+            self.color = config.BLUE_EFREI
             if is_border:
                 self.rect = pygame.Rect(relative_x + 80, relative_y + 55, width, height)
             else:
@@ -342,7 +339,7 @@ def run():
 
         def draw(self, surface=SCREEN):
             arrow_end = pygame.Vector2(ball.rect.center) + self.direction * (20 + slider.get_value())
-            pygame.draw.line(surface, BLUE_EFREI, ball.rect.center, arrow_end, 3)
+            pygame.draw.line(surface, config.BLUE_EFREI, ball.rect.center, arrow_end, 3)
             self.angle = math.atan2(self.direction.y, self.direction.x)
             arrow_angle = math.atan2(-self.direction.y, -self.direction.x)
             arrow_size = 10
@@ -350,11 +347,11 @@ def run():
                     arrow_end.y + arrow_size * math.sin(arrow_angle + math.pi / 6))
             right = (arrow_end.x + arrow_size * math.cos(arrow_angle - math.pi / 6),
                      arrow_end.y + arrow_size * math.sin(arrow_angle - math.pi / 6))
-            pygame.draw.polygon(surface, BLUE_EFREI, [arrow_end, left, right])
+            pygame.draw.polygon(surface, config.BLUE_EFREI, [arrow_end, left, right])
 
         def update_direction(self, mouse_pos):
-            global arrow_follow
-            if ball.velocity == 0 and arrow_follow:
+            global ARROW_FOLLOW
+            if ball.velocity == 0 and ARROW_FOLLOW:
                 direction = pygame.Vector2(mouse_pos) - pygame.Vector2(ball.rect.center)
                 if direction.length() > 0:
                     self.direction = direction.normalize()
@@ -380,7 +377,7 @@ def run():
             self.collision_rect.center = self.rect.center
 
         def draw(self, surface=SCREEN):
-            pygame.draw.circle(surface, WHITE, self.rect.center, 7)
+            pygame.draw.circle(surface, config.WHITE, self.rect.center, 7)
             surface.blit(self.image, self.rect)
 
     class Level(pygame.sprite.Sprite):
@@ -497,7 +494,7 @@ def run():
                 self.level_dwalls.append(DiagonalWall((300, 0), (400, 100)))
                 self.level_walls.append(Wall(350, 300, 6, 250, False))
             # Combine border walls with level-specific walls
-            self.all_walls = border_walls + self.level_walls
+            self.all_walls = BORDER_WALLS + self.level_walls
 
     class Score(pygame.sprite.Sprite):
         def __init__(self):
@@ -515,18 +512,18 @@ def run():
             self.score = 0
 
         def draw(self, surface=SCREEN):
-            text = self.font.render(f"Shots: {self.shots}", True, BLUE_EFREI)
+            text = self.font.render(f"Shots: {self.shots}", True, config.BLUE_EFREI)
             surface.blit(text, (10, 10))
 
     class Message(pygame.sprite.Sprite):
         def __init__(self):
             super().__init__()
             self.font = get_font(28)
-            self.fontcolor = BLUE_EFREI
+            self.fontcolor = config.BLUE_EFREI
             self.button_width = 150
             self.button_height = 50
             self.button_pos = (500 - self.button_width / 2, 275)
-            self.button_color = WHITE
+            self.button_color = config.WHITE
             self.button_rect = pygame.Rect(self.button_pos, (self.button_width, self.button_height))
 
         def draw(self, msg_type, surface=SCREEN):
@@ -544,13 +541,13 @@ def run():
                 button_msg = "OK"
 
             #Draw
-            text = self.font.render(msg, True, BLACK)
+            text = self.font.render(msg, True, config.BLACK)
             text_width, text_height = text.get_size()
             surface.blit(text, (surface.get_width() / 2 - text_width / 2, surface.get_height() / 2 - text_height / 2))
-            pygame.draw.rect(surface, BLACK, self.button_rect.inflate(6, 6))
+            pygame.draw.rect(surface, config.BLACK, self.button_rect.inflate(6, 6))
             pygame.draw.rect(surface, self.button_color, self.button_rect)
 
-            button_text = self.font.render(button_msg, True, BLACK)
+            button_text = self.font.render(button_msg, True, config.BLACK)
 
             #Below is to center the text in the button
             tbutton_width, tbutton_height = button_text.get_size()
@@ -559,12 +556,12 @@ def run():
             surface.blit(button_text,(tbuttonx, tbuttony)) #Draw the text
 
         def clicked(self, event):
-            global display_msg
+            global DISPLAY_MSG
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.button_rect.collidepoint(event.pos):
                     soundeffect_clicked.play()
-                    if won:
-                        self.button_color = GREY
+                    if WON:
+                        self.button_color = config.GREY
                         updatescore(game_state.level.number,score.score)
                         new_level = game_state.level.number + 1
                         print(new_level)
@@ -578,19 +575,19 @@ def run():
                         game_state.level.number=getlevel()
                         game_state.level = Level(game_state.level.number)
                     game_state.static_background = render_static_background(game_state.level)
-                    display_msg = False
+                    DISPLAY_MSG = False
             elif event.type == pygame.MOUSEBUTTONUP:
-                self.button_color = WHITE
+                self.button_color = config.WHITE
 
     class Resetbutton(pygame.sprite.Sprite):
         def __init__(self):
             super().__init__()
             self.font = get_font(24)
-            self.fontcolor = BLUE_EFREI
+            self.fontcolor = config.BLUE_EFREI
             self.text = self.font.render("Go back to checkpoint", True, self.fontcolor)
             self.width, self.height = self.text.get_size()
             self.pos = (1000 - 100 - self.width, 10)
-            self.color = WHITE
+            self.color = config.WHITE
             self.rect = pygame.Rect(self.pos, (self.width, self.height))
 
         def draw(self, surface=SCREEN):
@@ -603,13 +600,13 @@ def run():
                 if self.rect.collidepoint(event.pos):
                     print("Clicked")
                     soundeffect_clicked.play()
-                    self.color = GREY
+                    self.color = config.GREY
                     end_level()
                     game_state.level = Level(getlevel())
                     game_state.static_background = render_static_background(game_state.level)
 
             elif event.type == pygame.MOUSEBUTTONUP:
-                self.color = WHITE
+                self.color = config.WHITE
 
     class GameState:
         def __init__(self, level):
@@ -624,7 +621,7 @@ def run():
     borderbottom = Wall(0, 425, 900, 6, True)
     borderleft = Wall(0, 0, 6, 425, True)
     borderright = Wall(900, 0, 6, 431, True)
-    border_walls.extend([bordertop, borderbottom, borderleft, borderright])
+    BORDER_WALLS.extend([bordertop, borderbottom, borderleft, borderright])
 
     ball = Ball()
     slider = Slider()
@@ -654,22 +651,25 @@ def run():
             if event.type == pygame.QUIT:
                 running = False
 
-            if display_msg:
+            if DISPLAY_MSG:
                 message.clicked(event)
             else:
                 slider.handle_event(event)
                 launch_button.clicked(event)
                 resetbutton.clicked(event)
                 if event.type == pygame.MOUSEBUTTONDOWN and ball.velocity == 0:
-                    if arrow_follow:
-                        arrow_follow = False
+                    if ARROW_FOLLOW:
+                        ARROW_FOLLOW = False
                     else:
                         if field.rect.collidepoint(event.pos):
-                            arrow_follow = True
+                            ARROW_FOLLOW = True
                 if event.type == pygame.MOUSEBUTTONUP:
-                    launch_button.color = WHITE
-                    message.button_color = WHITE
-                    resetbutton.color = WHITE
+                    launch_button.color = config.WHITE
+                    message.button_color = config.WHITE
+                    resetbutton.color = config.WHITE
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return "Exit"
 
         # Blit the static background
         SCREEN.blit(game_state.static_background, (0, 0))
@@ -677,16 +677,15 @@ def run():
         if not game_state.level.flag.rect.colliderect(ball.rect) or ball.velocity != 0:
             game_state.level.flag.draw(SCREEN)
 
-        if display_msg:
-            if won:
+        if DISPLAY_MSG:
+            if WON:
                 message.draw("win")
             else:
                 message.draw("lose")
         else:
             if ball.velocity > 0:
                 ball.collision(game_state.level.all_walls, game_state.level.level_water,game_state.level.level_dwalls)
-                ball.unstuck()
-                ball.update_position(False)
+
             else:
                 arrow.update_direction(pygame.mouse.get_pos())
                 arrow.draw()
@@ -694,10 +693,13 @@ def run():
                 launch_button.draw()
                 resetbutton.draw()
 
+            ball.unstuck()
+            ball.update_position(False)
+
             if game_state.level.hole.collision_rect.colliderect(ball.rect) and ball.velocity < 10:
                 soundeffect_hole.play()
-                won = True
-                display_msg = True
+                WON = True
+                DISPLAY_MSG = True
             elif ball.velocity == 0 and score.shots == 5:
                 lose()
             else:
