@@ -19,6 +19,7 @@ BG = pygame.image.load(config.BG) # Background
 logo_long = pygame.image.load("assets/Common/Logo long EFREI sport.png") # Logo
 FONT = pygame.font.Font(config.FONT, 48) # Main FONT
 
+
 clock = pygame.time.Clock()
 
 # Game loop

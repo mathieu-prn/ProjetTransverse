@@ -24,6 +24,7 @@ clock = pygame.time.Clock()
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 blue_efrei = (18, 121, 190)
 GREY = (211, 211, 211)
 light_grey = (234, 234, 234)
@@ -48,6 +49,12 @@ rotation_speed = 2  # Vitesse de rotation
 
 # État du jeu
 game_over = False
+
+# Rectangle autour du gardien
+rect_x = 420+30
+rect_y = 72+30
+rect_width = 116
+rect_height = 193
 
 # Fonction pour réinitialiser le jeu
 def reset_game():
@@ -87,6 +94,20 @@ while running:
 
     pygame.draw.circle(screen, blue_efrei, (500, 440), 25)  # Penalty point
 
+    # Créer une surface temporaire pour dessiner le rectangle
+    temp_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
+    temp_surface.fill((0, 0, 0, 0))  # Remplir avec une couleur transparente
+
+    # Dessiner le rectangle sur la surface temporaire
+    pygame.draw.rect(temp_surface, BLACK, (0, 0, rect_width, rect_height), 2)
+
+    # Faire tourner la surface temporaire
+    rotated_surface = pygame.transform.rotate(temp_surface, angle)
+    rotated_rect = rotated_surface.get_rect(center=(rect_x + rect_width // 2, rect_y + rect_height // 2))
+
+    # Dessiner la surface rotée sur l'écran principal
+    screen.blit(rotated_surface, rotated_rect.topleft)
+
     if not game_over:
         # Calculer la direction vers la position cible
         dx = target_position[0] - ball_rect.centerx
@@ -108,20 +129,28 @@ while running:
         # Dessiner la balle à la nouvelle position
         screen.blit(ball_image, ball_rect.topleft)
 
+        # Dessiner le cercle autour du ballon
+        pygame.draw.circle(screen, BLACK, ball_rect.center, 25, 2)
+
         # Rotation du gardien
-        angle += rotation_speed
-        if angle >= 360:
-            angle = 0
+        if not game_over:
+            angle += rotation_speed
+            if angle >= 360:
+                angle = 0
 
         # Rotation de l'image du gardien
         rotated_goal = pygame.transform.rotate(goal, angle)
-        rotated_rect = rotated_goal.get_rect(center=(goal_x + goal_rect.width // 2, goal_y + goal_rect.height // 2))
+        rotated_goal_rect = rotated_goal.get_rect(center=(goal_x + goal_rect.width // 2, goal_y + goal_rect.height // 2))
 
         # Dessiner le gardien à la nouvelle position
-        screen.blit(rotated_goal, rotated_rect.topleft)
+        screen.blit(rotated_goal, rotated_goal_rect.topleft)
 
-        # Vérifier la collision entre le ballon et le gardien
-        if ball_rect.colliderect(rotated_rect):
+        # Vérifier la collision entre le cercle autour du ballon et le rectangle noir
+        if rotated_rect.collidepoint(ball_rect.center) or \
+           rotated_rect.collidepoint(ball_rect.centerx + 25, ball_rect.centery) or \
+           rotated_rect.collidepoint(ball_rect.centerx - 25, ball_rect.centery) or \
+           rotated_rect.collidepoint(ball_rect.centerx, ball_rect.centery + 25) or \
+           rotated_rect.collidepoint(ball_rect.centerx, ball_rect.centery - 25):
             print("perdu")
             game_over = True
     else:
