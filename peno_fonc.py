@@ -25,6 +25,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 blue_efrei = (18, 121, 190)
+blue_shade = (100, 210, 255)
 GREY = (211, 211, 211)
 light_grey = (234, 234, 234)
 GREEN = (148, 186, 134)
@@ -60,23 +61,20 @@ class Goalkeeper(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(self.x, self.y))
         self.rect_pos = (self.x, self.y)
         self.angle = 0
-        self.rotation_speed = 2
+        self.rotation_speed = 2.5
 
     def draw(self, surface=screen):
+        print(self.image_rot)
         surface.blit(self.image_rot, self.rect)
 
-    def rotate_keeper(self):
-        self.angle += self.rotation_speed
-        if self.angle >= 360:
-            self.angle = 0
-        #rotated_keeper =
-        #pygame.transform.rotate(keeper.image, keeper.angle)
-        #rotated_rect = rotated_keeper.get_rect(center=(keeper.x + keeper.rect.width // 2, keeper.y + keeper.rect.height // 2))
-        original_center = self.rect.center
+    def rotate_keeper(self,clockwise):
+        if clockwise:
+            self.angle = self.angle + self.rotation_speed
+        if not clockwise:
+            self.angle = self.angle - self.rotation_speed
         rotated_image = pygame.transform.rotate(self.image, self.angle)
-        self.angle = (self.angle + self.rotation_speed) % 360
-        self.image_rot = pygame.transform.rotate(self.image, self.angle)
-        self.rect = self.image.get_rect(center=self.rect.center)
+        self.image_rot = rotated_image
+        self.rect = self.image_rot.get_rect(center=self.rect.center)
 
 class Target(pygame.sprite.Sprite):
     def __init__(self):
@@ -85,7 +83,7 @@ class Target(pygame.sprite.Sprite):
         self.y = 440
         self.pos = (self.x, self.y)
     def draw(self, surface=screen):
-        pygame.draw.circle(surface,blue_efrei,self.pos,5)
+        pygame.draw.circle(surface,blue_shade,self.pos,5)
 # Vitesse de la balle
 #v = 5  # pixels par frame
 
@@ -103,6 +101,9 @@ game_over = False
 
 #Lock of Target
 target_lock = False
+
+#Angle of keeper
+clockwise = True
 
 # Fonction pour réinitialiser le jeu
 def reset_game():
@@ -156,7 +157,7 @@ while running:
     pygame.draw.line(screen, blue_efrei, (38, 72 + 190), (38 + 928, 72 + 190), width=8)
 
     pygame.draw.circle(screen, blue_efrei, (500, 440), 10)  # Penalty point
-
+    target.draw()
     if not game_over:
         # Calculer la direction vers la position cible
         #dx = target_position[0] - ball_rect.centerx
@@ -189,7 +190,10 @@ while running:
 
         # Rotation du gardien
         #angle += rotation_speed
-        keeper.rotate_keeper()
+        if keeper.angle >= 90 or keeper.angle <= -90:
+            temp = clockwise
+            clockwise = not temp
+        keeper.rotate_keeper(clockwise)
 
         # Rotation de l'image du gardien
         #rotated_keeper = pygame.transform.rotate(keeper.image, keeper.angle)
