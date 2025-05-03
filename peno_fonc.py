@@ -64,8 +64,8 @@ class Goalkeeper(pygame.sprite.Sprite):
         self.rotation_speed = 2.5
 
     def draw(self, surface=screen):
-        print(self.image_rot)
         surface.blit(self.image_rot, self.rect)
+        pygame.draw.circle(surface, blue_shade, self.rect_pos, 5)
 
     def rotate_keeper(self,clockwise):
         if clockwise:
@@ -75,6 +75,10 @@ class Goalkeeper(pygame.sprite.Sprite):
         rotated_image = pygame.transform.rotate(self.image, self.angle)
         self.image_rot = rotated_image
         self.rect = self.image_rot.get_rect(center=self.rect.center)
+        self.rect_pos = (500 - self.angle - pygame.Vector2(10,0).rotate(self.angle)[0],263 - pygame.Vector2(0, 100).rotate(self.angle)[1])
+        self.x = self.rect_pos[0]
+        self.y = self.rect_pos[1]
+        self.rect = self.image_rot.get_rect(center=(self.x, self.y))
 
 class Target(pygame.sprite.Sprite):
     def __init__(self):
