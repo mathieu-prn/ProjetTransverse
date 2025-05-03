@@ -154,9 +154,9 @@ while running:
     pygame.draw.rect(screen, blue_efrei, (32, 48, 936, 430))
     pygame.draw.rect(screen, light_grey, (32 + 6, 48 + 6, 936 - 12, 430 - 12))
 
-    pygame.draw.line(screen, blue_efrei, (405, 72), (405, 72 + 190), width=6) # Left
-    pygame.draw.line(screen, blue_efrei, (405 + 190, 72), (405 + 190, 72 + 190), width=6) #right
-    pygame.draw.line(screen, blue_efrei, (403, 72), (404 + 194, 72), width=6) #top
+    pygame.draw.line(screen, blue_efrei, (300, 72), (300, 72 + 190), width=6) # Left
+    pygame.draw.line(screen, blue_efrei, (405 + 190 + 105, 72), (405 + 190 + 105, 72 + 190), width=6) #right
+    pygame.draw.line(screen, blue_efrei, (298, 72), (404 + 194+105, 72), width=6) #top
 
     pygame.draw.line(screen, blue_efrei, (38, 72 + 190), (38 + 928, 72 + 190), width=8)
 
