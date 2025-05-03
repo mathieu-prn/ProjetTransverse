@@ -5,6 +5,7 @@ import game_select as gameselect
 
 # Initialize Pygame
 pygame.init()
+pygame.mixer.init()
 # Set up the game window
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
@@ -18,6 +19,7 @@ pygame.display.set_icon(pygame_icon)
 BG = pygame.image.load(config.BG) # Background
 logo_long = pygame.image.load("assets/Common/Logo long EFREI sport.png") # Logo
 FONT = pygame.font.Font(config.FONT, 48) # Main FONT
+soundeffect_clicked=pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
 
 
 clock = pygame.time.Clock()
@@ -32,8 +34,9 @@ while running:
             # "Start button"
             if (564 <= mouse_x <= 564 + 348 and 360 <= mouse_y <= 360 + 98):
                 print("Start button clicked")
+                soundeffect_clicked.play()
                 pygame.time.wait(200)  # Avoid multiple clicks
-                if gameselect.run(FONT, BG) == "Exit":  # RUN GAME_SELECT
+                if gameselect.run(FONT, BG) == "Exit":  # run game_select and handle the exit
                     pygame.event.clear()
 
     # Design of the page

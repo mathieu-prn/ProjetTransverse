@@ -29,6 +29,8 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
     game=None
     preview=None
 
+    soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
+
     GREY = (234, 234, 234)
 
     class button():
@@ -83,12 +85,12 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
                 for button in game_buttons:
                     if button.rect.collidepoint(mouse_pos):
                         print(f"{button.name} button clicked!")
+                        soundeffect_clicked.play()
                         game=button.name
                         if game == "Golf":
                             preview="golf"
@@ -99,6 +101,7 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
                         elif game=="Exit":
                             return "Exit"
                 if play_rect.collidepoint(mouse_pos):
+                    soundeffect_clicked.play()
                     if game=="Golf":
                         if golf.run()=="Exit":
                             pygame.event.clear()

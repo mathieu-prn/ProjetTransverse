@@ -10,7 +10,6 @@ def load_image(path):
     return IMAGE_CACHE[path]
 
 # Initialize necessary pygame modules
-pygame.mixer.init()
 pygame.font.init()
 
 pygame.display.set_caption("EfreiSport - Golf")
@@ -61,7 +60,8 @@ def run(): # Main function, called in the menu (game_select.py)
         """Update the score of the current level."""
         filename = "saves/golflevel.json"
         dico = loadfile(filename)
-        dico[str(levelnumber)] = score
+        if score>dico[str(levelnumber)]:
+            dico[str(levelnumber)] = score
         with open(filename, "w") as file:
             json.dump(dico, file)
 
@@ -125,13 +125,13 @@ def run(): # Main function, called in the menu (game_select.py)
         dy = py - yy
         return math.hypot(dx, dy), (xx, yy)
 
-
     # Render Static Background
     def render_static_background(level):
         static_bg = pygame.Surface((config.WIDTH, config.HEIGHT))
         static_bg.fill((240, 240, 240))
         static_bg.blit(BG, (0, 0))
         field.draw(static_bg)
+        level.draw(static_bg)
         for bunker in level.level_bunkers:
             bunker.draw(static_bg)
         for water in level.level_water:
@@ -496,6 +496,14 @@ def run(): # Main function, called in the menu (game_select.py)
             # Combine border walls with level-specific walls
             self.all_walls = BORDER_WALLS + self.level_walls
 
+            #level number display:
+            self.font=get_font(28)
+            self.fontcolor= config.BLUE_EFREI
+        def draw(self,surface):
+            msg="Level "+str(self.number)
+            text = self.font.render(msg, True, self.fontcolor)
+            surface.blit(text, (300, 10))
+
     class Score(pygame.sprite.Sprite):
         def __init__(self):
             super().__init__()
@@ -670,6 +678,21 @@ def run(): # Main function, called in the menu (game_select.py)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         return "Exit"
+                    keys = pygame.key.get_pressed()
+                    if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and (keys[pygame.K_KP_PLUS] or keys[pygame.K_KP_MINUS] or keys[pygame.K_KP_DIVIDE]): #cheats
+                        if keys[pygame.K_KP_PLUS]: #jump to next kevel
+                            newlvl=game_state.level.number+1
+                        elif keys[pygame.K_KP_MINUS]: #jump to previous level
+                            newlvl=game_state.level.number-1
+                        elif keys[pygame.K_KP_DIVIDE]: #reset level number
+                            newlvl=0
+                        game_state.level.number = newlvl
+                        end_level()
+                        print("gamestate loaded with level"+str(game_state.level.number))
+                        game_state.level = Level(game_state.level.number)
+                        game_state.static_background = render_static_background(game_state.level)
+
+
 
         # Blit the static background
         SCREEN.blit(game_state.static_background, (0, 0))
