@@ -19,7 +19,6 @@ def round_image_corners(image, radius):
     return rounded_image
 
 def run(FONT,BG): #Main function, called in the menu (menu.py)
-    pygame.display.set_caption("EfreiSport - Game select")
     play_button = pygame.image.load("assets/Common/play_button.png")
     lb_button_image = pygame.transform.scale(pygame.image.load("assets/Common/lb_button.png"),(100,100))  # leaderboard button
     #previews
@@ -82,6 +81,7 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
 
     running = True
     while running:
+        pygame.display.set_caption("EfreiSport - Game select")
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -111,7 +111,7 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
                     if game=="Penalty":
                         pass
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if event.key == pygame.K_ESCAPE: #Back to the menu when escape is pressed
                     return "Exit"
 
 

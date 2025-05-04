@@ -1,4 +1,4 @@
-import pygame, math
+import math
 from utility import *
 import config
 
@@ -9,13 +9,7 @@ def load_image(path):
         IMAGE_CACHE[path] = pygame.image.load(path).convert_alpha()
     return IMAGE_CACHE[path]
 
-# Initialize necessary pygame modules
-pygame.font.init()
-
-pygame.display.set_caption("EfreiSport - Golf")
-
 # ---- Initialize global variables
-
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 BG = load_image(config.BG)
 # Colors
@@ -32,6 +26,7 @@ BORDER_WALLS = []
 
 def run(): # Main function, called in the menu (game_select.py)
     global DISPLAY_MSG,WON,ARROW_FOLLOW,BORDER_WALLS
+    pygame.display.set_caption("EfreiSport - Golf")
     # Level Handling Functions
 
     # Might move some of these to utility.py
