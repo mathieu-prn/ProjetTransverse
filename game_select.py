@@ -1,4 +1,4 @@
-import pygame, config, golf as golf
+import pygame, config, golf as golf, basket as basket
 
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
@@ -106,7 +106,8 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
                         if golf.run()=="Exit":
                             pygame.event.clear()
                     if game=="Basket":
-                        pass
+                        if basket.run()=="Exit":
+                            pygame.event.clear()
                     if game=="Penalty":
                         pass
             if event.type == pygame.KEYDOWN:
