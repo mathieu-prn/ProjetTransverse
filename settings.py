@@ -12,7 +12,7 @@ def load_image(path):
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 BG = load_image(config.BG)
 
-#Sounds
+#Sounds and files
 soundeffect_clicked=pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
 
 def run():
@@ -48,18 +48,22 @@ def run():
         def __init__(self):
             super().__init__()
             #toggle
-            self.onasset=""
-            self.offasset=""
+            self.onasset=pygame.transform.scale(load_image("assets/Menu/Toggle_On.png"),(80,40))
+            self.offasset=pygame.transform.scale(load_image("assets/Menu/Toggle_Off.png"),(80,40))
             self.state=False
             self.rect=pygame.Rect(100, 100, 100, 30)
+            self.dest=(100,95)
 
             #text
             self.msg="Toggle Music"
             font=get_font(28)
             self.text=font.render(self.msg, True, config.BLACK)
         def draw(self):
-            pygame.draw.rect(SCREEN,config.BLUE_EFREI,self.rect,0,48)
-            SCREEN.blit(self.text, (215,94))
+            if self.state:
+                SCREEN.blit(self.onasset,self.dest)
+            else:
+                SCREEN.blit(self.offasset,self.dest)
+            SCREEN.blit(self.text, (210,94))
         def clicked(self):
             if self.rect.collidepoint(pygame.mouse.get_pos()):
                 if self.state:
