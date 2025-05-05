@@ -60,9 +60,13 @@ def run():
             self.velocity = 5
             self.angle = 0
             self.target_position = self.rect.center
-            self.z = 0
+            self.z = 1
 
-        def draw(self, surface=screen):
+        def draw(self, number_target,ball_at_target,surface=screen):
+            if number_target == 1 and not ball_at_target:
+                football.z -= 0.005
+                print(football.z)
+                football.image = pygame.transform.scale(football.image, (50 * football.z,50 * football.z))
             surface.blit(self.image, self.rect)
 
 
@@ -133,11 +137,13 @@ def run():
         ball_at_target = False
         football.x = 500
         football.y = 440
+        football.z = 1
         football.rect.center = (500, 440)
         target.pos = football.rect.center
         target.x =football.x
         target.y =football.y
         keeper.angle = 0
+
 
     football = Ball()
     keeper = Goalkeeper()
@@ -214,21 +220,24 @@ def run():
 
             # Draw football at new position
             football.rect.center = (football.x, football.y)
-            football.draw()
+
+            football.draw(number_target,ball_at_target)
 
             keeper.rect.update(keeper.x - 10, keeper.y - 10, 20, 20)
             rotated_hitbox = pygame.transform.rotate(keeper.hitbox_surface, keeper.angle)
             hitbox_rect = rotated_hitbox.get_rect(center=(keeper.x, keeper.y))
 
-            if  football.rect.colliderect(hitbox_rect) and football.x == target.x and football.y == target.y:
+            if  football.rect.colliderect(hitbox_rect) and ball_at_target:
                 game_over_lose = True
-            elif not football.rect.colliderect(hitbox_rect) and football.x == target.x and football.y == target.y and ball_at_target:
+            elif not football.rect.colliderect(hitbox_rect) and ball_at_target and football.x >= 310 and football.x <= 696 and football.y >= 72 and football.y <= 262:
                 game_over_win = True
+            elif ball_at_target:
+                game_over_lose = True
 
         else:
             keeper.rotate_keeper(clockwise, ball_at_target)
             keeper.draw()
-            football.draw()
+            football.draw(number_target,ball_at_target)
             # Show "lost" on screen
             if game_over_lose:
                 font = pygame.font.Font(None, 74)
