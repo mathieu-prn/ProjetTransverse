@@ -36,11 +36,14 @@ target_lock = False
 #1 if ball was launched, else 0
 number_target = 0
 
+#Boolean that tells if the ball is at the target
+ball_at_target = False
+
 #Angle of keeper
 clockwise = True
 
 def run():
-    global game_over,target_lock,clockwise,number_target
+    global game_over,target_lock,clockwise,number_target,ball_at_target
     pygame.display.set_caption("EfreiSport - Penalty")
 
     class Ball(pygame.sprite.Sprite):
@@ -84,18 +87,27 @@ def run():
             hitbox_rect = rotated_hitbox.get_rect(center=(self.x, self.y))
             surface.blit(rotated_hitbox, hitbox_rect)
 
-        def rotate_keeper(self,clockwise):
-            if clockwise:
-                self.angle = self.angle + self.rotation_speed
-            if not clockwise:
-                self.angle = self.angle - self.rotation_speed
-            rotated_image = pygame.transform.rotate(self.image, self.angle)
-            self.image_rot = rotated_image
-            self.rect = self.image_rot.get_rect(center=(self.x,self.y))
-            self.rect_pos = (500 - self.angle - pygame.Vector2(10,0).rotate(self.angle)[0],263 - pygame.Vector2(0, 100).rotate(self.angle)[1])
-            self.x = self.rect_pos[0]
-            self.y = self.rect_pos[1]
-            self.mask = pygame.mask.from_surface(self.image_rot)
+        def rotate_keeper(self,clockwise,ball_at_target):
+            if not ball_at_target:
+                if clockwise:
+                    self.angle = self.angle + self.rotation_speed
+                if not clockwise:
+                    self.angle = self.angle - self.rotation_speed
+                rotated_image = pygame.transform.rotate(self.image, self.angle)
+                self.image_rot = rotated_image
+                self.rect = self.image_rot.get_rect(center=(self.x,self.y))
+                self.rect_pos = (500 - self.angle - pygame.Vector2(10,0).rotate(self.angle)[0],263 - pygame.Vector2(0, 100).rotate(self.angle)[1])
+                self.x = self.rect_pos[0]
+                self.y = self.rect_pos[1]
+                self.mask = pygame.mask.from_surface(self.image_rot)
+            elif ball_at_target:
+                rotated_image = pygame.transform.rotate(self.image, self.angle)
+                self.image_rot = rotated_image
+                self.rect = self.image_rot.get_rect(center=(self.x, self.y))
+                self.rect_pos = (500 - self.angle - pygame.Vector2(10, 0).rotate(self.angle)[0],263 - pygame.Vector2(0, 100).rotate(self.angle)[1])
+                self.x = self.rect_pos[0]
+                self.y = self.rect_pos[1]
+                self.mask = pygame.mask.from_surface(self.image_rot)
 
 
     class Target(pygame.sprite.Sprite):
@@ -109,11 +121,12 @@ def run():
 
     # Function to reset the game
     def reset_game():
-        global game_over,target_lock,number_target,clockwise
+        global game_over,target_lock,number_target,clockwise,ball_at_target
         game_over = False
         target_lock = False
         number_target = 0
         clockwise = True
+        ball_at_target = False
         football.x = 500
         football.y = 440
         football.rect.center = (500, 440)
@@ -148,6 +161,7 @@ def run():
                                 target_lock = False
                             else:
                                 target_lock = True
+
         # Design of the page
         screen.fill((240, 240, 240, 0.5))
         screen.blit(bg, (0, 0))
@@ -182,18 +196,21 @@ def run():
                 football.x = target.x
                 football.y = target.y
 
-            # Draw football at new position
-            football.rect.center = (football.x, football.y)
-            football.draw()
+            if target.x == football.x and target.y == football.y and number_target == 1:
+                ball_at_target = True
 
             # Rotate keeper
             if keeper.angle >= 90 or keeper.angle <= -90:
                 temp = clockwise
                 clockwise = not temp
-            keeper.rotate_keeper(clockwise)
+            keeper.rotate_keeper(clockwise,ball_at_target)
 
             # Draw the keeper at new position
             keeper.draw()
+
+            # Draw football at new position
+            football.rect.center = (football.x, football.y)
+            football.draw()
 
             keeper.rect.update(keeper.x - 10, keeper.y - 10, 20, 20)
             rotated_hitbox = pygame.transform.rotate(keeper.hitbox_surface, keeper.angle)
