@@ -1,4 +1,4 @@
-import pygame, json, math
+import pygame, json, math, random
 from utility import *
 
 # ---------- Initialization & Global Setup ----------
@@ -39,13 +39,20 @@ number_target = 0
 #Boolean that tells if the ball is at the target
 ball_at_target = False
 
+#Says if the strength is locked
+locked = False
+
 #Angle of keeper
 clockwise = True
 
+#Function to run the program
 def run():
-    global game_over_lose,game_over_win, clockwise,number_target,ball_at_target
+
+    #Global Setup
+    global game_over_lose,game_over_win, clockwise,number_target,ball_at_target,locked
     pygame.display.set_caption("EfreiSport - Penalty")
 
+    #Class for football
     class Ball(pygame.sprite.Sprite):
         def __init__(self):
             super().__init__()
@@ -58,15 +65,38 @@ def run():
             self.angle = 0
             self.target_position = self.rect.center
             self.z = 1
+            self.strength_force = 0.2
+            self.increase = True
+            self.offsetx = 0
+            self.offsety = 0
 
-        def draw(self, number_target,ball_at_target,surface=screen):
-            if number_target == 1 and not ball_at_target:
+        def strength(self):
+            if self.increase:
+                self.strength_force += 0.05
+            elif not self.increase:
+                self.strength_force -= 0.05
+            if self.strength_force >= 1:
+                self.increase = False
+            elif self.strength_force <= 0.2:
+                self.increase = True
+            print(self.strength_force)
+
+        def random_factor(self):
+            angle = random.randint(0, 360)
+            self.offsetx = math.cos(math.radians(angle)) * random.uniform(0.2,self.strength_force)*100
+            self.offsety = math.sin(math.radians(angle)) * random.uniform(0.2,self.strength_force)*100
+            print(self.offsetx,self.offsety)
+
+        def draw(self, number_target,ball_at_target,locked,surface=screen):
+            if number_target == 0:
+
+                pygame.draw.circle(surface,(100, 210, 255), (500,440), 17+self.strength_force*100, 2)
+            elif number_target == 1 and not ball_at_target and locked: #Statement to change the ball's size when kicked
                 football.z -= 0.005
-                print(football.z)
                 football.image = pygame.transform.smoothscale(football.image, (50 * football.z,50 * football.z))
             surface.blit(self.image, self.rect)
 
-
+    #Class for keeper
     class Goalkeeper(pygame.sprite.Sprite):
         def __init__(self):
             super().__init__()
@@ -81,17 +111,19 @@ def run():
             self.mask = pygame.mask.from_surface(self.image)
             self.z = 20
 
+            #Keeper's hitbox
             self.hitbox_surface = pygame.Surface((40, 150), pygame.SRCALPHA)
             pygame.draw.rect(self.hitbox_surface, (255, 0, 0, 150), self.hitbox_surface.get_rect())
 
         def draw(self, surface=screen):
             surface.blit(self.image_rot, self.rect)
-            pygame.draw.circle(surface, blue_shade, self.rect_pos, 5)
+            '''pygame.draw.circle(surface, blue_shade, self.rect_pos, 5)'''
+            #Show the keeper's hitbox
             rotated_hitbox = pygame.transform.rotate(self.hitbox_surface, self.angle)
             hitbox_rect = rotated_hitbox.get_rect(center=(self.x, self.y))
             surface.blit(rotated_hitbox, hitbox_rect)
 
-        def rotate_keeper(self,clockwise,ball_at_target):
+        def rotate_keeper(self,clockwise,ball_at_target):   #Rotation of keeper
             if not ball_at_target:
                 if clockwise:
                     self.angle = self.angle + self.rotation_speed
@@ -113,7 +145,7 @@ def run():
                 self.y = self.rect_pos[1]
                 self.mask = pygame.mask.from_surface(self.image_rot)
 
-
+    #Class for football's target
     class Target(pygame.sprite.Sprite):
         def __init__(self):
             super().__init__()
@@ -125,9 +157,10 @@ def run():
 
     # Function to reset the game
     def reset_game():
-        global game_over_lose,game_over_win,number_target,clockwise,ball_at_target
+        global game_over_lose,game_over_win,number_target,clockwise,ball_at_target,locked
         game_over_lose = False
         game_over_win = False
+        locked = False
         number_target = 0
         clockwise = True
         ball_at_target = False
@@ -141,7 +174,7 @@ def run():
         target.y =football.y
         keeper.angle = 0
 
-
+    #Assignment of objects
     football = Ball()
     keeper = Goalkeeper()
     target = Target()
@@ -153,15 +186,19 @@ def run():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left click
+                if event.button == 1:
                     if game_over_lose or game_over_win:
                         # Check if the "Start Again" button is clicked
                         if 400 <= event.pos[0] <= 600 and 225 <= event.pos[1] <= 275:
                             reset_game()
+                    elif target.x == football.x and target.y == football.y and number_target == 0 and not locked:
+                        locked = True
                     else:
                         if target.x == football.x and target.y == football.y and number_target == 0:
-                            target.x = event.pos[0]
-                            target.y = event.pos[1]
+                            #See if player locked target
+                            football.random_factor()
+                            target.x = event.pos[0] + football.offsetx
+                            target.y = event.pos[1] + football.offsety
                             target.pos = (target.x, target.y)
                             number_target += 1
 
@@ -214,8 +251,9 @@ def run():
 
             # Draw football at new position
             football.rect.center = (football.x, football.y)
-
-            football.draw(number_target,ball_at_target)
+            if not locked:
+                football.strength()
+            football.draw(number_target,ball_at_target,locked)
 
             keeper.rect.update(keeper.x - 10, keeper.y - 10, 20, 20)
             rotated_hitbox = pygame.transform.rotate(keeper.hitbox_surface, keeper.angle)
@@ -231,7 +269,7 @@ def run():
         else:
             keeper.rotate_keeper(clockwise, ball_at_target)
             keeper.draw()
-            football.draw(number_target,ball_at_target)
+            football.draw(number_target,ball_at_target,locked)
             # Show "lost" on screen
             if game_over_lose:
                 font = pygame.font.Font(None, 74)
