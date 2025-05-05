@@ -33,11 +33,14 @@ game_over = False
 #Lock of Target
 target_lock = False
 
+#1 if ball was launched, else 0
+number_target = 0
+
 #Angle of keeper
 clockwise = True
 
 def run():
-    global game_over,target_lock,clockwise
+    global game_over,target_lock,clockwise,number_target
     pygame.display.set_caption("EfreiSport - Penalty")
 
     class Ball(pygame.sprite.Sprite):
@@ -51,6 +54,7 @@ def run():
             self.velocity = 5
             self.angle = 0
             self.target_position = self.rect.center
+            self.z = 0
 
         def draw(self, surface=screen):
             surface.blit(self.image, self.rect)
@@ -68,6 +72,7 @@ def run():
             self.angle = 0
             self.rotation_speed = 1
             self.mask = pygame.mask.from_surface(self.image)
+            self.z = 20
 
             self.hitbox_surface = pygame.Surface((40, 150), pygame.SRCALPHA)
             pygame.draw.rect(self.hitbox_surface, (255, 0, 0, 150), self.hitbox_surface.get_rect())
@@ -104,8 +109,11 @@ def run():
 
     # Function to reset the game
     def reset_game():
-        global game_over
+        global game_over,target_lock,number_target,clockwise
         game_over = False
+        target_lock = False
+        number_target = 0
+        clockwise = True
         football.x = 500
         football.y = 440
         football.rect.center = (500, 440)
@@ -131,10 +139,11 @@ def run():
                         if 400 <= event.pos[0] <= 600 and 225 <= event.pos[1] <= 275:
                             reset_game()
                     else:
-                        if target.x == football.x and target.y == football.y:
+                        if target.x == football.x and target.y == football.y and number_target == 0:
                             target.x = event.pos[0]
                             target.y = event.pos[1]
                             target.pos = (target.x, target.y)
+                            number_target += 1
                             if target_lock:
                                 target_lock = False
                             else:
@@ -190,8 +199,7 @@ def run():
             rotated_hitbox = pygame.transform.rotate(keeper.hitbox_surface, keeper.angle)
             hitbox_rect = rotated_hitbox.get_rect(center=(keeper.x, keeper.y))
 
-            if  football.rect.colliderect(hitbox_rect):
-                print("lost")
+            if  football.rect.colliderect(hitbox_rect) and football.x == target.x and football.y == target.y:
                 game_over = True
 
         else:
