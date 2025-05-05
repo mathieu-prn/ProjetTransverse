@@ -1,4 +1,4 @@
-import pygame, config, golf as golf, basket as basket
+import pygame, config, golf as golf, basket as basket, peno_fonc as peno_fonc
 
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
@@ -109,7 +109,8 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
                         if basket.run()=="Exit":
                             pygame.event.clear()
                     if game=="Penalty":
-                        pass
+                        if peno_fonc.run() == "Exit":
+                            pygame.event.clear()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE: #Back to the menu when escape is pressed
                     return "Exit"
