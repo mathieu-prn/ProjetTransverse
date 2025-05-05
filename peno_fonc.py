@@ -9,10 +9,6 @@ WIDTH, HEIGHT = 1000, 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 bg = pygame.image.load("assets/Common/Background.png")  # Background
 
-#ball_image = pygame.image.load("assets/Football/ball.png")  # Ball
-#ball_rect = ball_image.get_rect()
-#ball_rect.topleft = (475, 415)
-
 logo_long = pygame.image.load("assets/Common/Logo long EFREI sport.png")  # Logo
 pygame.display.set_icon(logo_long)
 
@@ -31,7 +27,7 @@ GREEN = (148, 186, 134)
 BUNKER_YELLOW = (237, 225, 141)
 WATER_BLUE = (0, 167, 250)
 
-# État du jeu
+# State of the game
 game_over = False
 
 #Lock of Target
@@ -67,7 +63,7 @@ def run():
             self.image_rot = self.image
             self.x = 500
             self.y = 167
-            self.rect = self.image.get_rect(center=(self.x, self.y))
+            self.rect = self.image_rot.get_rect(center=(self.x, self.y))
             self.rect_pos = (self.x, self.y)
             self.angle = 0
             self.rotation_speed = 1
@@ -87,7 +83,7 @@ def run():
             self.rect_pos = (500 - self.angle - pygame.Vector2(10,0).rotate(self.angle)[0],263 - pygame.Vector2(0, 100).rotate(self.angle)[1])
             self.x = self.rect_pos[0]
             self.y = self.rect_pos[1]
-            self.rect = self.image_rot.get_rect(center=(self.x, self.y))
+            self.rect = self.image_rot.get_rect(center=(self.x,self.y))
 
     class Target(pygame.sprite.Sprite):
         def __init__(self):
@@ -98,10 +94,7 @@ def run():
         def draw(self, surface=screen):
             pygame.draw.circle(surface,blue_shade,self.pos,5)
 
-
-
-
-    # Fonction pour réinitialiser le jeu
+    # Function to reset the game
     def reset_game():
         global game_over
         game_over = False
@@ -124,9 +117,9 @@ def run():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Clic gauche de la souris
+                if event.button == 1:  # Left click
                     if game_over:
-                        # Vérifier si le bouton "Recommencer" est cliqué
+                        # Check if the "Start Again" button is clicked
                         if 400 <= event.pos[0] <= 600 and 225 <= event.pos[1] <= 275:
                             reset_game()
                     else:
@@ -138,7 +131,6 @@ def run():
                                 target_lock = False
                             else:
                                 target_lock = True
-        #print(f"Ball: {football.rect}, Keeper: {keeper.rect}, Collision: {football.rect.colliderect(keeper.rect)}")
         # Design of the page
         screen.fill((240, 240, 240, 0.5))
         screen.blit(bg, (0, 0))
@@ -155,68 +147,55 @@ def run():
         pygame.draw.circle(screen, blue_efrei, (500, 440), 10)  # Penalty point
         target.draw()
         if not game_over:
-            # Calculer la direction vers la position cible
-            #dx = target_position[0] - ball_rect.centerx
+            # Find the direction vector between ball and target
             dx = target.x - football.x
-            #dy = target_position[1] - ball_rect.centery
             dy = target.y - football.y
             distance = math.hypot(dx, dy)
 
-            #if distance > v:
             if distance > football.velocity:
-                # Normaliser le vecteur de direction
+                # Normalize the direction vector
                 dx /= distance
                 dy /= distance
 
-                # Mettre à jour la position de la balle
-                #ball_rect.centerx += dx * v
+                # Update the ball's position
                 football.x += dx * football.velocity
-                #ball_rect.centery += dy * v
                 football.y += dy * football.velocity
             else:
-                # Si la distance est inférieure à la vitesse, positionner directement la balle à la cible
-                #ball_rect.center = target_position
+                # If ball almost at target, move to target position
                 football.x = target.x
                 football.y = target.y
 
-            # Dessiner la balle à la nouvelle position
-            #screen.blit(ball_image, ball_rect.topleft)
+            # Draw football at new position
             football.rect.center = (football.x, football.y)
             football.draw()
 
-            # Rotation du gardien
-            #angle += rotation_speed
+            # Rotate keeper
             if keeper.angle >= 90 or keeper.angle <= -90:
                 temp = clockwise
                 clockwise = not temp
             keeper.rotate_keeper(clockwise)
 
-            # Rotation de l'image du gardien
-            #rotated_keeper = pygame.transform.rotate(keeper.image, keeper.angle)
-            #rotated_rect = rotated_keeper.get_rect(center=(keeper.x + keeper.rect.width // 2, keeper.y + keeper.rect.height // 2))
-
-            # Dessiner le gardien à la nouvelle position
-            #screen.blit(rotated_goal, rotated_rect.topleft)
+            # Draw the keeper at new position
             keeper.draw()
 
-            # Vérifier la collision entre le ballon et le gardien
-            #if ball_rect.colliderect(rotated_rect):
+            # Keeper's hitbox height and width
             keeper.rect.height = 20
             keeper.rect.width = 20
+
             pygame.draw.rect(screen, blue_efrei, keeper.rect)
             if  football.rect.colliderect(keeper.rect):
-                print("perdu")
+                print("lost")
                 game_over = True
         else:
-            # Afficher "perdu" à l'écran
+            # Show "lost" on screen
             font = pygame.font.Font(None, 74)
             text = font.render("Perdu", True, RED)
             screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2 - 50))
 
-            # Dessiner le bouton "Recommencer"
+            # Draw the Start Again button
             pygame.draw.rect(screen, GREEN, (400, 225, 200, 50))
             font = pygame.font.Font(None, 36)
-            text = font.render("Recommencer", True, BLACK)
+            text = font.render("    Start Again", True, BLACK)
             screen.blit(text, (410, 235))
 
         # Update the display
