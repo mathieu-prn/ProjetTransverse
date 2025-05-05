@@ -27,8 +27,11 @@ GREEN = (148, 186, 134)
 BUNKER_YELLOW = (237, 225, 141)
 WATER_BLUE = (0, 167, 250)
 
-# State of the game
-game_over = False
+# Boolean for loss
+game_over_lose = False
+
+# Boolean for win
+game_over_win = False
 
 #Lock of Target
 target_lock = False
@@ -43,7 +46,7 @@ ball_at_target = False
 clockwise = True
 
 def run():
-    global game_over,target_lock,clockwise,number_target,ball_at_target
+    global game_over_lose,game_over_win, target_lock,clockwise,number_target,ball_at_target
     pygame.display.set_caption("EfreiSport - Penalty")
 
     class Ball(pygame.sprite.Sprite):
@@ -85,7 +88,7 @@ def run():
             pygame.draw.circle(surface, blue_shade, self.rect_pos, 5)
             rotated_hitbox = pygame.transform.rotate(self.hitbox_surface, self.angle)
             hitbox_rect = rotated_hitbox.get_rect(center=(self.x, self.y))
-            #surface.blit(rotated_hitbox, hitbox_rect)
+            surface.blit(rotated_hitbox, hitbox_rect)
 
         def rotate_keeper(self,clockwise,ball_at_target):
             if not ball_at_target:
@@ -121,8 +124,9 @@ def run():
 
     # Function to reset the game
     def reset_game():
-        global game_over,target_lock,number_target,clockwise,ball_at_target
-        game_over = False
+        global game_over_lose,game_over_win,target_lock,number_target,clockwise,ball_at_target
+        game_over_lose = False
+        game_over_win = False
         target_lock = False
         number_target = 0
         clockwise = True
@@ -147,7 +151,7 @@ def run():
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left click
-                    if game_over:
+                    if game_over_lose or game_over_win:
                         # Check if the "Start Again" button is clicked
                         if 400 <= event.pos[0] <= 600 and 225 <= event.pos[1] <= 275:
                             reset_game()
@@ -177,7 +181,7 @@ def run():
 
         pygame.draw.circle(screen, blue_efrei, (500, 440), 10)  # Penalty point
         target.draw()
-        if not game_over:
+        if not game_over_lose and not game_over_win:
             # Find the direction vector between ball and target
             dx = target.x - football.x
             dy = target.y - football.y
@@ -217,17 +221,23 @@ def run():
             hitbox_rect = rotated_hitbox.get_rect(center=(keeper.x, keeper.y))
 
             if  football.rect.colliderect(hitbox_rect) and football.x == target.x and football.y == target.y:
-                game_over = True
+                game_over_lose = True
+            elif not football.rect.colliderect(hitbox_rect) and football.x == target.x and football.y == target.y and ball_at_target:
+                game_over_win = True
 
         else:
             keeper.rotate_keeper(clockwise, ball_at_target)
             keeper.draw()
             football.draw()
             # Show "lost" on screen
-            font = pygame.font.Font(None, 74)
-            text = font.render("Perdu", True, RED)
-            screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2 - 50))
-
+            if game_over_lose:
+                font = pygame.font.Font(None, 74)
+                text = font.render("Loss", True, RED)
+                screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2 - 50))
+            elif game_over_win:
+                font = pygame.font.Font(None, 74)
+                text = font.render("Win", True, RED)
+                screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2 - 50))
             # Draw the Start Again button
             pygame.draw.rect(screen, GREEN, (400, 225, 200, 50))
             font = pygame.font.Font(None, 36)
