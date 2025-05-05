@@ -33,9 +33,6 @@ game_over_lose = False
 # Boolean for win
 game_over_win = False
 
-#Lock of Target
-target_lock = False
-
 #1 if ball was launched, else 0
 number_target = 0
 
@@ -46,7 +43,7 @@ ball_at_target = False
 clockwise = True
 
 def run():
-    global game_over_lose,game_over_win, target_lock,clockwise,number_target,ball_at_target
+    global game_over_lose,game_over_win, clockwise,number_target,ball_at_target
     pygame.display.set_caption("EfreiSport - Penalty")
 
     class Ball(pygame.sprite.Sprite):
@@ -66,7 +63,7 @@ def run():
             if number_target == 1 and not ball_at_target:
                 football.z -= 0.005
                 print(football.z)
-                football.image = pygame.transform.scale(football.image, (50 * football.z,50 * football.z))
+                football.image = pygame.transform.smoothscale(football.image, (50 * football.z,50 * football.z))
             surface.blit(self.image, self.rect)
 
 
@@ -128,13 +125,13 @@ def run():
 
     # Function to reset the game
     def reset_game():
-        global game_over_lose,game_over_win,target_lock,number_target,clockwise,ball_at_target
+        global game_over_lose,game_over_win,number_target,clockwise,ball_at_target
         game_over_lose = False
         game_over_win = False
-        target_lock = False
         number_target = 0
         clockwise = True
         ball_at_target = False
+        football.image = pygame.image.load("assets/Football/ball.png")
         football.x = 500
         football.y = 440
         football.z = 1
@@ -167,10 +164,7 @@ def run():
                             target.y = event.pos[1]
                             target.pos = (target.x, target.y)
                             number_target += 1
-                            if target_lock:
-                                target_lock = False
-                            else:
-                                target_lock = True
+
 
         # Design of the page
         screen.fill((240, 240, 240, 0.5))
