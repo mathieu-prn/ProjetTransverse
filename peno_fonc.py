@@ -67,10 +67,17 @@ def run():
             self.rect_pos = (self.x, self.y)
             self.angle = 0
             self.rotation_speed = 1
+            self.mask = pygame.mask.from_surface(self.image)
+
+            self.hitbox_surface = pygame.Surface((40, 150), pygame.SRCALPHA)
+            pygame.draw.rect(self.hitbox_surface, (255, 0, 0, 150), self.hitbox_surface.get_rect())
 
         def draw(self, surface=screen):
             surface.blit(self.image_rot, self.rect)
             pygame.draw.circle(surface, blue_shade, self.rect_pos, 5)
+            rotated_hitbox = pygame.transform.rotate(self.hitbox_surface, self.angle)
+            hitbox_rect = rotated_hitbox.get_rect(center=(self.x, self.y))
+            surface.blit(rotated_hitbox, hitbox_rect)
 
         def rotate_keeper(self,clockwise):
             if clockwise:
@@ -83,6 +90,7 @@ def run():
             self.rect_pos = (500 - self.angle - pygame.Vector2(10,0).rotate(self.angle)[0],263 - pygame.Vector2(0, 100).rotate(self.angle)[1])
             self.x = self.rect_pos[0]
             self.y = self.rect_pos[1]
+            self.mask = pygame.mask.from_surface(self.image_rot)
 
 
     class Target(pygame.sprite.Sprite):
@@ -178,15 +186,14 @@ def run():
             # Draw the keeper at new position
             keeper.draw()
 
-            # Keeper's hitbox height and width
-            #keeper.rect.height = 20
-            #keeper.rect.width = 20
             keeper.rect.update(keeper.x - 10, keeper.y - 10, 20, 20)
+            rotated_hitbox = pygame.transform.rotate(keeper.hitbox_surface, keeper.angle)
+            hitbox_rect = rotated_hitbox.get_rect(center=(keeper.x, keeper.y))
 
-            pygame.draw.rect(screen, blue_efrei, keeper.rect)
-            if  football.rect.colliderect(keeper.rect):
+            if  football.rect.colliderect(hitbox_rect):
                 print("lost")
                 game_over = True
+
         else:
             # Show "lost" on screen
             font = pygame.font.Font(None, 74)
