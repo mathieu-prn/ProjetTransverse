@@ -11,12 +11,13 @@ def load_image(path):
 # ---- Initialize global variables
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 BG = load_image(config.BG)
+TOGGLESTATE=True
 
 #Sounds and files
 soundeffect_clicked=pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
 
 def run():
-
+    global TOGGLESTATE
     def get_font(size): # Returns a pygame font of size "size"
         return pygame.font.Font(config.FONT, size)
 
@@ -44,13 +45,13 @@ def run():
             rect=text.get_rect()
             SCREEN.blit(text, (500-rect[2]/2,10))
 
-    class MusicToggle(pygame.sprite.Sprite):
+    class SoundToggle(pygame.sprite.Sprite):
         def __init__(self):
             super().__init__()
             #toggle
             self.onasset=pygame.transform.scale(load_image("assets/Menu/Toggle_On.png"),(80,40))
             self.offasset=pygame.transform.scale(load_image("assets/Menu/Toggle_Off.png"),(80,40))
-            self.state=False
+            self.state=TOGGLESTATE #Initial state of the toggle - TOGGLESTATE global variable is used to save this state when leaving the settings window
             self.rect=pygame.Rect(100, 100, 100, 30)
             self.dest=(100,95)
 
@@ -65,25 +66,40 @@ def run():
                 SCREEN.blit(self.offasset,self.dest)
             SCREEN.blit(self.text, (210,94))
         def clicked(self):
+            global TOGGLESTATE
             if self.rect.collidepoint(pygame.mouse.get_pos()):
+                soundeffect_clicked.play()
                 if self.state:
                     pygame.mixer.music.pause()
                 else:
                     pygame.mixer.music.unpause()
-                self.state = not self.state
+                TOGGLESTATE = not TOGGLESTATE
+                self.state = TOGGLESTATE
                 print("toggle state: "+str(self.state))
 
-    class HelpSection(pygame.sprite.Sprite):
+    class HelpButton(pygame.sprite.Sprite):
         def __init__(self):
             super().__init__()
-            self.h1msg="How to play"
-            self.h1=get_font(32).render(self.h1msg, True, config.BLUE_EFREI)
-            self.end=250
+            self.msg="How to play"
+            self.text = get_font(35).render(self.msg, True, config.BLUE_EFREI)
+            self.text_rect = self.text.get_rect()
+            self.text_rect.center=(500,300)
+            self.button_rect=self.text_rect.inflate(20,20)
+
+        def draw(self):
+            pygame.draw.rect(SCREEN, config.BLUE_EFREI, self.button_rect, border_radius=44)
+            pygame.draw.rect(SCREEN, (255, 255, 255), self.button_rect.inflate(-8,-8), border_radius=44)
+            SCREEN.blit(self.text, (self.text_rect.center[0]-self.text_rect.width/2, self.text_rect.center[1]-self.text_rect.height/2))
+        def clicked(self):
+            pass
+
+
 
     #Game Objects Creation
     backarrow = BackArrow()
     title= Title()
-    mtoggle=MusicToggle()
+    stoggle=SoundToggle()
+    hbutton=HelpButton()
 
     # Game loop
     clock = pygame.time.Clock()
@@ -95,8 +111,8 @@ def run():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mtoggle.clicked()
-                if backarrow.clicked():
+                stoggle.clicked()
+                if backarrow.clicked(): #Back to the menu when the back arrow is clicked
                     return "Exit"
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE: #Back to the menu when escape is pressed
@@ -109,7 +125,8 @@ def run():
         # Design of the page
         backarrow.draw()
         title.draw()
-        mtoggle.draw()
+        stoggle.draw()
+        hbutton.draw()
         # Update the display
         pygame.display.flip()
 
