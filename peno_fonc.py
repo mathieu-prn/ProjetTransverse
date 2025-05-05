@@ -79,11 +79,11 @@ def run():
                 self.angle = self.angle - self.rotation_speed
             rotated_image = pygame.transform.rotate(self.image, self.angle)
             self.image_rot = rotated_image
-            self.rect = self.image_rot.get_rect(center=self.rect.center)
+            self.rect = self.image_rot.get_rect(center=(self.x,self.y))
             self.rect_pos = (500 - self.angle - pygame.Vector2(10,0).rotate(self.angle)[0],263 - pygame.Vector2(0, 100).rotate(self.angle)[1])
             self.x = self.rect_pos[0]
             self.y = self.rect_pos[1]
-            self.rect = self.image_rot.get_rect(center=(self.x,self.y))
+
 
     class Target(pygame.sprite.Sprite):
         def __init__(self):
@@ -179,8 +179,9 @@ def run():
             keeper.draw()
 
             # Keeper's hitbox height and width
-            keeper.rect.height = 20
-            keeper.rect.width = 20
+            #keeper.rect.height = 20
+            #keeper.rect.width = 20
+            keeper.rect.update(keeper.x - 10, keeper.y - 10, 20, 20)
 
             pygame.draw.rect(screen, blue_efrei, keeper.rect)
             if  football.rect.colliderect(keeper.rect):
