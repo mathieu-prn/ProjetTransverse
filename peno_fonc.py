@@ -85,7 +85,7 @@ def run():
             pygame.draw.circle(surface, blue_shade, self.rect_pos, 5)
             rotated_hitbox = pygame.transform.rotate(self.hitbox_surface, self.angle)
             hitbox_rect = rotated_hitbox.get_rect(center=(self.x, self.y))
-            surface.blit(rotated_hitbox, hitbox_rect)
+            #surface.blit(rotated_hitbox, hitbox_rect)
 
         def rotate_keeper(self,clockwise,ball_at_target):
             if not ball_at_target:
@@ -220,6 +220,9 @@ def run():
                 game_over = True
 
         else:
+            keeper.rotate_keeper(clockwise, ball_at_target)
+            keeper.draw()
+            football.draw()
             # Show "lost" on screen
             font = pygame.font.Font(None, 74)
             text = font.render("Perdu", True, RED)
