@@ -90,6 +90,8 @@ def run(): # Main function, called in the menu (game_select.py)
             self.launched = False
             self.time = 0
             self.angle = 0
+            arrow.direction = pygame.Vector2(1, 0)
+            arrow.follow = True
             self.x_coeff = (0, ball.rect.centerx)
             self.y_coeff = (0, 0, ball.rect.centery)
 
@@ -116,8 +118,8 @@ def run(): # Main function, called in the menu (game_select.py)
                         self.angle = -self.angle
                     self.velocity *= bounce_coeff
                     if self.velocity < 5 and not ball.scored:
-                        time.sleep(0.5)
-                        self.reset_position()
+                            time.sleep(0.5)
+                            self.reset_position()
                     else:
                         self.unstuck(min(dx, dy) + 1, ldiff, rdiff, bdiff, tdiff, dx, dy, wall)
                         self.change_trajectory_equation(self.velocity, self.angle, self.rect.centerx, self.rect.centery)
@@ -289,7 +291,7 @@ def run(): # Main function, called in the menu (game_select.py)
         def get_value(self):
             min_y = self.rect.top
             max_y = self.rect.bottom - self.slider_rect.height
-            return int(100 - (((self.slider_rect.y - min_y) / (max_y - min_y)) * 100)) + int(10 * ((self.slider_rect.y - min_y) / (max_y - min_y)))
+            return int(125 - (((self.slider_rect.y - min_y) / (max_y - min_y)) * 125)) + int(10 * ((self.slider_rect.y - min_y) / (max_y - min_y)))
 
     class Launch(pygame.sprite.Sprite):
         def __init__(self):
@@ -389,7 +391,7 @@ def run(): # Main function, called in the menu (game_select.py)
                     msg = f"You won in {ball.player.bounces} bounces! You scored {ball.player.new_score}/10 points."
                 button_msg = "Next player"
             elif msg_type == "end":
-                msg = f"Congratulations! You finished all the levels.\nFinal scores:\nPlayer 1:{score1.score}\nPlayer 2:{score2.score}"
+                msg = f"Congratulations, {score1.name if score1.score>score2.score else score2.name}! You won!"
                 button_msg = "Ok"
             else:
                 msg = "Message not defined"
@@ -434,7 +436,7 @@ def run(): # Main function, called in the menu (game_select.py)
 
     #Initializing game objects
     score1=Score(10, 10, "Player 1", blue_efrei)
-    score2=Score(850, 10, "PLayer 2", red)
+    score2=Score(850, 10, "Player 2", red)
     ball = Ball()
     hoop = Hoop()
     slider = Slider()
@@ -523,7 +525,7 @@ def run(): # Main function, called in the menu (game_select.py)
 
         #checks if the game is finished or next player
         if ball.scored:
-            if score1.level>=4 and score2.level>=4:
+            if score1.level>4 and score2.level>=4:
                 message.draw("end")
             else:
                 message.draw("next")
