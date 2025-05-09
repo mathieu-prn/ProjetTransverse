@@ -61,16 +61,19 @@ def run(): # Main function, called in the menu (game_select.py)
             self.launched = False
             self.player = score1
 
+        #intialize coefficients for the trajectory equation
         def init_trajectory_equation(self, velocity, angle, x0, y0):
             self.x_coeff = (math.cos(angle) * velocity, x0)
             self.y_coeff = (0.5 * G, -math.sin(angle) * velocity, y0)
             self.time = 0
 
+        #change coefficients on collision with a wall (make it bounce)
         def change_trajectory_equation(self, bounce_coeff, angle, x0, y0):
             self.x_coeff = (self.velocity * math.cos(angle), x0)
             self.y_coeff = (0.5 * G, -self.velocity * math.sin(angle), y0)
             self.time = 0
 
+        #checks if there is a collision with the rect that detects a score
         def hoop_collision(self):
             if self.rect.bottom > hoop_detector.rect.top and self.velocity > 0:
                 if self.rect.colliderect(hoop_detector):
@@ -79,7 +82,7 @@ def run(): # Main function, called in the menu (game_select.py)
                         soundeffect_inthebasket.play()
                         self.scored = True
 
-
+        #resets position and coefficients
         def reset_position(self):
             # Reset ball position and state after scoring
             self.rect.center = (150, 400)
@@ -90,13 +93,18 @@ def run(): # Main function, called in the menu (game_select.py)
             self.x_coeff = (0, ball.rect.centerx)
             self.y_coeff = (0, 0, ball.rect.centery)
 
+        #checks if the ball collides with a wall
         def collision(self, walls_list):
             for wall in walls_list:
                 if self.rect.inflate(1, 1).colliderect(wall.rect):
+                    #Counts the bounces
                     if not ball.scored:
                         self.player.bounces += 1
+                        print("Collision " + str(self.player.bounces))
+                    #Bounce sound
                     if self.velocity > 5 and self.time > 0.2:
                         soundeffect_bounce.play()
+                    #Detects what type of collision
                     dx = min(abs(self.rect.right - wall.rect.left), abs(self.rect.left - wall.rect.right))
                     dy = min(abs(self.rect.bottom - wall.rect.top), abs(self.rect.top - wall.rect.bottom))
                     ldiff = self.rect.left - wall.rect.right
@@ -117,6 +125,7 @@ def run(): # Main function, called in the menu (game_select.py)
                     return True
             return False
 
+        #moves the ball so it does not collide infintely and is stuck
         def unstuck(self, change, ld, rd, bd, td, dx, dy, wall):
             if self.rect.right > wall.rect.left and dx<=dy and abs(rd)<abs(ld):
                 self.rect.center = (self.rect.center[0] - change, self.rect.center[1])
@@ -127,11 +136,13 @@ def run(): # Main function, called in the menu (game_select.py)
             elif self.rect.top < wall.rect.bottom and dx>dy and abs(td)<abs(bd):
                 self.rect.center = (self.rect.center[0], self.rect.center[1] + change)
 
+        #calculates the new position using the coefficients of the trajectory
         def update_pos(self):
             self.rect.center = self.x_coeff[0] * self.time + self.x_coeff[1], self.y_coeff[0] * (self.time**2) + self.y_coeff[1] * self.time + self.y_coeff[2]
             self.velocity = math.sqrt((math.cos(self.angle) * self.velocity) ** 2 + (math.sin(self.angle) * self.velocity) ** 2)
             self.time += dt
 
+        #draws the object
         def draw(self, surface):
             surface.blit(self.image, self.rect)
 
@@ -144,6 +155,7 @@ def run(): # Main function, called in the menu (game_select.py)
             self.rect = self.image.get_rect()
             self.rect.center = (885,250)
 
+        #draws the object
         def draw(self, surface):
             surface.blit(self.image, self.rect)
 
@@ -157,6 +169,7 @@ def run(): # Main function, called in the menu (game_select.py)
             else:
                 self.rect = pygame.Rect(relative_x + 80 - width / 2, relative_y + 55 - height / 2, width, height)
 
+        #draws the object
         def draw(self, surface=screen):
             if self.visible:
                 pygame.draw.rect(surface, self.color, self.rect)
@@ -174,6 +187,7 @@ def run(): # Main function, called in the menu (game_select.py)
             self.rect=self.image.get_rect()
             self.rect.center= (x,y)
 
+        #draws the object
         def draw(self, surface):
             pygame.draw.rect(surface, self.color, self.rect)
 
@@ -187,6 +201,7 @@ def run(): # Main function, called in the menu (game_select.py)
             self.width=width
             self.height=height
 
+        #draws the object
         def draw(self,surface):
             pygame.draw.rect(surface,self.color,(self.x,self.y,self.width,self.height))
 
@@ -202,6 +217,7 @@ def run(): # Main function, called in the menu (game_select.py)
             self.name = name
             self.font = pygame.font.Font("assets/Common/font.ttf", 28)
 
+        #calculates the score depending on the number of bounces
         def increment(self):
             if self.bounces == 0:
                 self.new_score = 10
@@ -217,9 +233,11 @@ def run(): # Main function, called in the menu (game_select.py)
                 self.new_score = 1
             self.score += self.new_score
 
+        #resets score
         def reset(self):
             self.score = 0
 
+        #draws the object
         def draw(self, surface=screen):
             text = self.font.render(f"Points: {self.score}", True, self.color)
             surface.blit(text, self.position)
@@ -232,6 +250,7 @@ def run(): # Main function, called in the menu (game_select.py)
             self.position = (400, 10)
             self.font = pygame.font.Font("assets/Common/font.ttf", 28)
 
+        #draws object
         def draw(self, surface=screen):
             text = self.font.render(f"{self.name}'s turn", True, self.color)
             surface.blit(text, self.position)
@@ -255,16 +274,19 @@ def run(): # Main function, called in the menu (game_select.py)
             self.slider_rect = pygame.Rect(25, 151, 30, 7)
             self.speed = 3
 
+        #draws object
         def draw(self, surface):
             pygame.draw.rect(surface, blue_efrei, self.rect.inflate(6, 6))
             pygame.draw.rect(surface, white, self.rect)
             pygame.draw.rect(surface, black, self.slider_rect)
 
+        #moves slider automatically
         def move(self):
             if not self.rect.y < self.slider_rect.y < self.rect.y + self.rect.height - self.slider_rect.height:
                 self.speed = - self.speed
             self.slider_rect.y += self.speed
 
+        #calculates the value of the slider
         def get_value(self):
             min_y = self.rect.top
             max_y = self.rect.bottom - self.slider_rect.height
@@ -276,6 +298,7 @@ def run(): # Main function, called in the menu (game_select.py)
             self.rect = pygame.Rect(17, 396, 50, 80)
             self.color = white
 
+        # draws object
         def draw(self, surface=screen):
             pygame.draw.rect(surface, blue_efrei, self.rect.inflate(6, 6))
             pygame.draw.rect(surface, self.color, self.rect)
@@ -283,6 +306,7 @@ def run(): # Main function, called in the menu (game_select.py)
             text = font.render("Go!", True, blue_efrei)
             surface.blit(text, (self.rect.x, self.rect.y + 30))
 
+        #launches the ball by passing the angle and speed value and calculating coeffs
         def clicked(self, event):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
@@ -302,6 +326,7 @@ def run(): # Main function, called in the menu (game_select.py)
             self.angle = 0
             self.follow = True
 
+        # draws object
         def draw(self, surface):
             arrow_end = pygame.Vector2(ball.rect.center) + self.direction * (20 + slider.get_value())
             pygame.draw.line(surface, blue_efrei, ball.rect.center, arrow_end, 3)
@@ -314,6 +339,7 @@ def run(): # Main function, called in the menu (game_select.py)
                      arrow_end.y + arrow_size * math.sin(arrow_angle - math.pi / 6))
             pygame.draw.polygon(surface, blue_efrei, [arrow_end, left, right])
 
+        #calculates the angle depending on the arrow
         def update_direction(self, mouse_pos):
             if arrow.follow:
                 direction = pygame.Vector2(mouse_pos) - pygame.Vector2(ball.rect.center)
@@ -327,6 +353,7 @@ def run(): # Main function, called in the menu (game_select.py)
             self.number = number
             self.level_walls = []    # Level-specific walls
 
+            #adds wall depending on level
             if self.number == 1:
                 pass
             elif self.number == 2:
@@ -353,6 +380,7 @@ def run(): # Main function, called in the menu (game_select.py)
             self.button_color = white
             self.button_rect = pygame.Rect(self.button_pos, (self.button_width, self.button_height))
 
+        # shows info messages
         def draw(self, msg_type, surface=screen):
             self.fontcolor = ball.player.color
             if msg_type == "next":
@@ -383,6 +411,7 @@ def run(): # Main function, called in the menu (game_select.py)
             tbuttony=self.button_pos[1]+((self.button_height-tbutton_height)/2)
             surface.blit(button_text,(tbuttonx, tbuttony)) #Draw the text
 
+        #passes to the next player
         def clicked(self, event):
             global display_msg
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -404,7 +433,7 @@ def run(): # Main function, called in the menu (game_select.py)
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.button_color = white
 
-
+    #Initializing game objects
     score1=Score(10, 10, "Player 1", blue_efrei)
     score2=Score(850, 10, "PLayer 2", red)
     ball = Ball()
@@ -414,7 +443,7 @@ def run(): # Main function, called in the menu (game_select.py)
     launch_button = Launch()
     hoop_detector = Hoop_detector(841,270)
 
-
+    #Initializing basic walls
     bordertop = Wall(0, 0, 900, 6, True, True)
     borderbottom = Wall(0, 425, 900, 6, True, True)
     borderleft = Wall(0, 0, 6, 425, True, True)
@@ -425,6 +454,7 @@ def run(): # Main function, called in the menu (game_select.py)
     hoop_walls = [hoop_border2, hoop_border3]
     border_walls = [bordertop, borderbottom, borderleft, borderright, hoop_border1]
 
+    #Initializing info objects
     level = Level(score1.level)
     message = Message()
     player = Player(score1.name, score1.color)
@@ -439,8 +469,11 @@ def run(): # Main function, called in the menu (game_select.py)
     # Game loop
     running = True
     while running:
+        #Updates current level and player
         level = Level(ball.player.level)
         player = Player(ball.player.name, ball.player.color)
+
+        #Event detection
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -454,19 +487,22 @@ def run(): # Main function, called in the menu (game_select.py)
                 if event.key == pygame.K_ESCAPE:
                     return "Exit"
 
-
+        #Screen drawing
         screen.fill((240, 240, 240, 0.5))
         screen.blit(bg, (0, 0))
         screen.blit(windowbg,getrelativepos((0,0)))
 
+        #enables collision
         if ball.velocity>0 and ball.time > dt:
             ball.collision(level.all_walls)
             if not ball.scored:
                 ball.collision(hoop_walls)
 
+        #draws walls
         for wall in level.all_walls + hoop_walls:
             wall.draw()
 
+        #draws some game objects if ball not launched
         if ball.launched:
             ball.update_pos()
         else:
@@ -477,6 +513,7 @@ def run(): # Main function, called in the menu (game_select.py)
             ball.angle = -arrow.angle
             slider.move()
 
+        #darws resting game objects
         ball.hoop_collision()
         ball.draw(screen)
         hoop.draw(screen)
@@ -484,6 +521,8 @@ def run(): # Main function, called in the menu (game_select.py)
         score1.draw(screen)
         score2.draw(screen)
         player.draw()
+
+        #checks if the game is finished or next player
         if ball.scored:
             if score1.level>=4 and score2.level>=4:
                 message.draw("end")
