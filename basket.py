@@ -100,7 +100,6 @@ def run(): # Main function, called in the menu (game_select.py)
                     #Counts the bounces
                     if not ball.scored:
                         self.player.bounces += 1
-                        print("Collision " + str(self.player.bounces))
                     #Bounce sound
                     if self.velocity > 5 and self.time > 0.2:
                         soundeffect_bounce.play()
