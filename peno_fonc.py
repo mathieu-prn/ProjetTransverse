@@ -103,6 +103,7 @@ def run():
                 football.z -= 0.005
                 football.image = pygame.transform.smoothscale(football.image, (50 * football.z,50 * football.z))
             surface.blit(self.image, self.rect)
+            pygame.draw.rect(screen,RED,self.rect)
 
     #Class for keeper
     class Goalkeeper(pygame.sprite.Sprite):

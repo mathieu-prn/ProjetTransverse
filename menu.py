@@ -65,7 +65,9 @@ while running:
                 pygame.time.wait(200)  # Avoid multiple clicks
                 if gameselect.run(FONT, BG) == "Exit":  # run game_select and handle the exit
                     pygame.event.clear()
-
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:  # Back to the menu when escape is pressed
+                pygame.quit()
     # Design of the page
 
     # Overlay "efrei sport"
