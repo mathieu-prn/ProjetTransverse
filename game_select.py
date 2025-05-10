@@ -1,3 +1,4 @@
+
 import pygame, config, golf as golf, basket as basket, peno_fonc as penalty, help as help
 
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
