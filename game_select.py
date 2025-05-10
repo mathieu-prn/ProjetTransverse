@@ -1,4 +1,4 @@
-import pygame, config, golf as golf, basket as basket, peno_fonc as penalty
+import pygame, config, golf as golf, basket as basket, peno_fonc as penalty, help as help
 
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
@@ -20,18 +20,17 @@ def round_image_corners(image, radius):
 
 def run(FONT,BG): #Main function, called in the menu (menu.py)
     play_button = pygame.image.load("assets/Common/play_button.png")
-    lb_button_image = pygame.transform.scale(pygame.image.load("assets/Common/lb_button.png"),(100,100))  # leaderboard button
+    help_button_image = pygame.transform.scale(pygame.image.load("assets/Common/help_button.png"),(100,100))  # help button
     #previews
     golf_preview = pygame.transform.scale(pygame.image.load("assets/Menu/golf_preview.png"),(530,298))
     basket_preview = pygame.transform.scale(pygame.image.load("assets/Menu/basket_preview.png"),(530,298))
-    penalty_preview = pygame.transform.scale(pygame.image.load("assets/Menu/penalty_preview.png"),(530,298))
 
     game=None
     preview=None
 
     soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
 
-    GREY = (234, 234, 234)
+    GREY = (234, 234, 234) #different grey from the one in config.py
 
     class button():
         def __init__(self,name):
@@ -58,7 +57,7 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
 
     play_rect = pygame.Rect(772, 332, 160, 160)
 
-    class Lb_button():
+    class Help_button():
         def __init__(self):
             super().__init__()
             self.borderrect = pygame.rect.Rect(398, 332, 160, 160)
@@ -66,11 +65,24 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
         def draw(self):
             pygame.draw.rect(SCREEN, config.BLUE_EFREI, self.borderrect, border_radius=24)
             pygame.draw.rect(SCREEN, GREY, self.rect, border_radius=24)
-            if preview == "golf":
-                SCREEN.blit(lb_button_image, (430, 365))
+            SCREEN.blit(help_button_image, (430, 365))
+        def clicked(self,game):
+            if self.rect.collidepoint(pygame.mouse.get_pos()): # If the click was on the button
+                soundeffect_clicked.play()
+                if game=="Golf":
+                    if help.run(game)=="Exit":
+                        pygame.event.clear()
+                elif game=="Basket":
+                    if help.run(game)=="Exit":
+                        pygame.event.clear()
+                elif game=="Penalty":
+                    if help.run(game)=="Exit":
+                        pygame.event.clear()
+
+
 
     #Define game objects
-    lb_button = Lb_button()
+    help_button = Help_button()
 
     basket_b = button("Basket")
     penalty_b = button("Penalty")
@@ -87,6 +99,7 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                help_button.clicked(game)
                 mouse_pos = event.pos
                 for button in game_buttons:
                     if button.rect.collidepoint(mouse_pos):
@@ -95,7 +108,7 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
                         game=button.name
                         if game == "Golf":
                             preview="golf"
-                        elif game == "Penalty":
+                        elif game == "Foot":
                             preview="foot"
                         elif game=="Basket":
                             preview="basket"
@@ -136,11 +149,11 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
             elif preview=="basket":
                 im_preview=round_image_corners(basket_preview, 24)
             elif preview=="foot":
-                im_preview=round_image_corners(penalty_preview, 24)
+                pass
             SCREEN.blit(im_preview, (400, 18))
 
         # Historic button
-        lb_button.draw()
+        help_button.draw()
 
         # Play button
         pygame.draw.rect(SCREEN, config.BLUE_EFREI, (772, 332, 160, 160), border_radius=24)
