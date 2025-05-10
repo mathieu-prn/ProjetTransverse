@@ -1,4 +1,4 @@
-import pygame, json, math, random
+import math, random
 from utility import *
 
 # ---------- Initialization & Global Setup ----------
@@ -61,7 +61,6 @@ def run():
     global game_over_lose,game_over_win, clockwise,number_target,ball_at_target,locked
     pygame.display.set_caption("EfreiSport - Penalty")
 
-
     #Class for football
     class Ball(pygame.sprite.Sprite):
         def __init__(self):
@@ -71,16 +70,16 @@ def run():
             self.x = 500
             self.y = 440
             self.rect.center = (self.x, self.y)
-            self.velocity = 5
-            self.angle = 0
+            self.velocity = 5   #Ball's velocity
             self.target_position = self.rect.center
             self.z = 1
-            self.strength_force = 0.2
+            self.strength_force = 0.2   #Ball's precision
             self.increase = True
             self.offsetx = 0
             self.offsety = 0
             self.force_velocity = 0.02
 
+        #Ball's precision, change of its value before player locks it
         def strength(self):
             if self.increase:
                 self.strength_force += self.force_velocity
@@ -91,19 +90,19 @@ def run():
             elif self.strength_force <= 0.2:
                 self.increase = True
 
+        #Calculation of offset for randomness of the ball
         def random_factor(self):
             angle = random.randint(0, 360)
             self.offsetx = math.cos(math.radians(angle)) * random.uniform(0.2,self.strength_force)*110
             self.offsety = math.sin(math.radians(angle)) * random.uniform(0.2,self.strength_force)*110
 
         def draw(self, number_target,ball_at_target,locked,surface=screen):
-            if number_target == 0:
+            if number_target == 0: #Blue circle for ball's precision
                 pygame.draw.circle(surface,(100, 210, 255), (500,440), 17+self.strength_force*100, 2)
             elif number_target == 1 and not ball_at_target and locked: #Statement to change the ball's size when kicked
                 football.z -= 0.005
                 football.image = pygame.transform.smoothscale(football.image, (50 * football.z,50 * football.z))
             surface.blit(self.image, self.rect)
-
 
     #Class for keeper
     class Goalkeeper(pygame.sprite.Sprite):
@@ -116,7 +115,7 @@ def run():
             self.rect = self.image_rot.get_rect(center=(self.x, self.y))
             self.rect_pos = (self.x, self.y)
             self.angle = 0
-            self.rotation_speed = 1
+            self.rotation_speed = 1     #Keeper's rotation speed
             self.mask = pygame.mask.from_surface(self.image)
             self.z = 20
             #Keeper's hitbox
@@ -126,6 +125,7 @@ def run():
         def draw(self, surface=screen):
             surface.blit(self.image_rot, self.rect)
 
+        #Rotation of Keeper with 2 cases: if the ball arrived or not
         def rotate_keeper(self,clockwise,ball_at_target):   #Rotation of keeper
             if not ball_at_target:
                 if clockwise:
@@ -200,6 +200,7 @@ def run():
         clockwise = True
         ball_at_target = False
         football.image = pygame.image.load("assets/Football/ball.png")
+        #Place back ball at original position
         football.x = 500
         football.y = 440
         football.z = 1
@@ -207,7 +208,7 @@ def run():
         target.pos = football.rect.center
         target.x =football.x
         target.y =football.y
-        keeper.angle = 0
+        keeper.angle = 0    #Keeper is back straight
 
 
     #Assignment of objects
@@ -228,6 +229,7 @@ def run():
                         # Check if the "Start Again" button is clicked
                         if 400 <= event.pos[0] <= 600 and 285 <= event.pos[1] <= 335:
                             reset_game()
+                    #Check for game difficulty
                     elif event.pos[0] >= difficulty.x1 and event.pos[0] <= difficulty.x1+90 and event.pos[1] >= difficulty.y1 and event.pos[1] <= difficulty.y1+30:
                         soundeffect_clicked.play()
                         if difficulty.chosen != "Easy":
@@ -249,17 +251,19 @@ def run():
                             keeper.rotation_speed = 3.5
                             football.force_velocity = 0.1
                             reset_game()
+                    #If player locked ball's precision
                     elif target.x == football.x and target.y == football.y and number_target == 0 and not locked:
                         soudeffect_hit.play()
                         locked = True
+                    #If player locked ball's target
                     elif target.x == football.x and target.y == football.y and number_target == 0:
                         soundeffect_kick.play()
-                        #See if player locked target
                         football.random_factor()
                         target.x = event.pos[0] + football.offsetx
                         target.y = event.pos[1] + football.offsety
                         target.pos = (target.x, target.y)
                         number_target += 1
+            #Verify if player pressed the escape key to go back to game selection
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return "Exit"
@@ -297,10 +301,11 @@ def run():
                 football.x += dx * football.velocity
                 football.y += dy * football.velocity
             else:
-                # If ball almost at target, move to target position
+                # If the ball is almost at target, move to the target's position
                 football.x = target.x
                 football.y = target.y
 
+            #Verify if the ball is at target
             if target.x == football.x and target.y == football.y and number_target == 1:
                 ball_at_target = True
 
@@ -319,10 +324,12 @@ def run():
                 football.strength()
             football.draw(number_target,ball_at_target,locked)
 
+            #Update the keeper's hitbox
             keeper.rect.update(keeper.x - 10, keeper.y - 10, 20, 20)
             rotated_hitbox = pygame.transform.rotate(keeper.hitbox_surface, keeper.angle)
             hitbox_rect = rotated_hitbox.get_rect(center=(keeper.x, keeper.y))
 
+            #Check collision between Football and Keeper
             if football.rect.colliderect(hitbox_rect) and ball_at_target:
                 soundeffect_lose.play()
                 game_over_lose = True
@@ -335,6 +342,7 @@ def run():
                 game_over_lose = True
 
         else:
+            #Static Keeper and Football
             keeper.rotate_keeper(clockwise, ball_at_target)
             keeper.draw()
             football.draw(number_target,ball_at_target,locked)
@@ -343,6 +351,7 @@ def run():
                 font = pygame.font.Font(None, 90)
                 text = font.render("Loss...", True, BLACK)
                 screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2 - 50))
+            #Show "win" on screen
             elif game_over_win:
                 font = pygame.font.Font(None, 90)
                 text = font.render("Win!", True, BLACK)
