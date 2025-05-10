@@ -25,6 +25,7 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
     #previews
     golf_preview = pygame.transform.scale(pygame.image.load("assets/Menu/golf_preview.png"),(530,298))
     basket_preview = pygame.transform.scale(pygame.image.load("assets/Menu/basket_preview.png"),(530,298))
+    penalty_preview = pygame.transform.scale(pygame.image.load("assets/Menu/penalty_preview.png"),(530,298))
 
     game=None
     preview=None
@@ -109,8 +110,8 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
                         game=button.name
                         if game == "Golf":
                             preview="golf"
-                        elif game == "Foot":
-                            preview="foot"
+                        elif game == "Penalty":
+                            preview="penalty"
                         elif game=="Basket":
                             preview="basket"
                         elif game=="Exit":
@@ -149,8 +150,8 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
                 im_preview=round_image_corners(golf_preview, 24)
             elif preview=="basket":
                 im_preview=round_image_corners(basket_preview, 24)
-            elif preview=="foot":
-                pass
+            elif preview=="penalty":
+                im_preview=round_image_corners(penalty_preview,24)
             SCREEN.blit(im_preview, (400, 18))
 
         # Historic button
