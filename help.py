@@ -70,11 +70,11 @@ def run(game):
             elif game=="Basket":
                 self.text=[
                     ("h1font", "WARNING"),
-                    ("textfont", "   This is a 2 players game"),
+                    ("textfont", "   This is a 2 players game!"),
                     ("h1font", "Goal of the game"),
                     ("textfont","   The goal is to score more points than your opponent by making basket with the fewest bounces possible."),
                     ("textfont","   There are 4 levels of increasing difficulty. The points are awarded immediately after you make a basket, and"),
-                    ("textfont","   then the shot is given to your opponent. There are obstacles in the levels, they are blue walls that will block"),
+                    ("textfont","   then the shot is given to your opponent. Each level have their own obstacles, they are blue walls that will block"),
                     ("textfont","   and reflect the ball."),
                     ("textfont","   The winner of the game is the player with the most points."),
                     ("h1font", "Controls"),
