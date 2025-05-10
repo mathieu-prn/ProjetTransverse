@@ -53,12 +53,14 @@ locked = False
 #Angle of keeper
 clockwise = True
 
+
 #Function to run the program
 def run():
 
     #Global Setup
     global game_over_lose,game_over_win, clockwise,number_target,ball_at_target,locked
     pygame.display.set_caption("EfreiSport - Penalty")
+
 
     #Class for football
     class Ball(pygame.sprite.Sprite):
@@ -93,16 +95,15 @@ def run():
             angle = random.randint(0, 360)
             self.offsetx = math.cos(math.radians(angle)) * random.uniform(0.2,self.strength_force)*110
             self.offsety = math.sin(math.radians(angle)) * random.uniform(0.2,self.strength_force)*110
-            print(self.offsetx,self.offsety)
 
         def draw(self, number_target,ball_at_target,locked,surface=screen):
             if number_target == 0:
-
                 pygame.draw.circle(surface,(100, 210, 255), (500,440), 17+self.strength_force*100, 2)
             elif number_target == 1 and not ball_at_target and locked: #Statement to change the ball's size when kicked
                 football.z -= 0.005
                 football.image = pygame.transform.smoothscale(football.image, (50 * football.z,50 * football.z))
             surface.blit(self.image, self.rect)
+
 
     #Class for keeper
     class Goalkeeper(pygame.sprite.Sprite):
@@ -118,14 +119,12 @@ def run():
             self.rotation_speed = 1
             self.mask = pygame.mask.from_surface(self.image)
             self.z = 20
-
             #Keeper's hitbox
             self.hitbox_surface = pygame.Surface((40, 150), pygame.SRCALPHA)
             pygame.draw.rect(self.hitbox_surface, (255, 0, 0, 150), self.hitbox_surface.get_rect())
 
         def draw(self, surface=screen):
             surface.blit(self.image_rot, self.rect)
-            '''pygame.draw.circle(surface, blue_shade, self.rect_pos, 5)'''
 
         def rotate_keeper(self,clockwise,ball_at_target):   #Rotation of keeper
             if not ball_at_target:
@@ -139,7 +138,6 @@ def run():
                 self.rect_pos = (500 - self.angle - pygame.Vector2(10,0).rotate(self.angle)[0],263 - pygame.Vector2(0, 100).rotate(self.angle)[1])
                 self.x = self.rect_pos[0]
                 self.y = self.rect_pos[1]
-                self.mask = pygame.mask.from_surface(self.image_rot)
             elif ball_at_target:
                 rotated_image = pygame.transform.rotate(self.image, self.angle)
                 self.image_rot = rotated_image
@@ -147,7 +145,7 @@ def run():
                 self.rect_pos = (500 - self.angle - pygame.Vector2(10, 0).rotate(self.angle)[0],263 - pygame.Vector2(0, 100).rotate(self.angle)[1])
                 self.x = self.rect_pos[0]
                 self.y = self.rect_pos[1]
-                self.mask = pygame.mask.from_surface(self.image_rot)
+
 
     #Class for football's target
     class Target(pygame.sprite.Sprite):
@@ -156,8 +154,10 @@ def run():
             self.x = 500
             self.y = 440
             self.pos = (self.x, self.y)
+
         def draw(self, surface=screen):
             pygame.draw.circle(surface,blue_shade,self.pos,5)
+
 
     #Assign game difficulty level
     class Level(pygame.sprite.Sprite):
@@ -170,12 +170,7 @@ def run():
             self.x3 = 650
             self.y3 = 13
             self.chosen = "Easy"
-            #if event.pos[0] >= self.x1 and event.pos[0] <= self.x1+90 and event.pos[1] >= self.y1 and event.pos[1] <= self.y1+30:
-            #    self.chosen = "Easy"
-            #elif event.pos[0] >= self.x2 and event.pos[0] <= self.x2+90 and event.pos[1] >= self.y2 and event.pos[1] <= self.y2+30:
-            #    self.chosen = "Medium"
-            #elif event.pos[0] >= self.x3 and event.pos[0] <= self.x3+90 and event.pos[1] >= self.y3 and event.pos[1] <= self.y3+30:
-            #    self.chosen = "Hard"
+
         def draw(self, surface=screen):
             if self.chosen == "Easy":
                 pygame.draw.rect(surface, blue_efrei, pygame.Rect(self.x1-5, self.y1-3, 100, 36))
@@ -193,6 +188,7 @@ def run():
             surface.blit(text1, (self.x1+23, self.y1 +5))
             surface.blit(text2, (self.x2+7, self.y2 +5))
             surface.blit(text3, (self.x3+23, self.y3 +5))
+
 
     # Function to reset the game
     def reset_game():
@@ -212,6 +208,7 @@ def run():
         target.x =football.x
         target.y =football.y
         keeper.angle = 0
+
 
     #Assignment of objects
     football = Ball()
@@ -284,6 +281,7 @@ def run():
         pygame.draw.circle(screen, blue_efrei, (500, 440), 10)  # Penalty point
         difficulty.draw()
         target.draw()
+
         if not game_over_lose and not game_over_win:
             # Find the direction vector between ball and target
             dx = target.x - football.x
@@ -324,6 +322,7 @@ def run():
             keeper.rect.update(keeper.x - 10, keeper.y - 10, 20, 20)
             rotated_hitbox = pygame.transform.rotate(keeper.hitbox_surface, keeper.angle)
             hitbox_rect = rotated_hitbox.get_rect(center=(keeper.x, keeper.y))
+
             if football.rect.colliderect(hitbox_rect) and ball_at_target:
                 soundeffect_lose.play()
                 game_over_lose = True
