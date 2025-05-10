@@ -103,7 +103,6 @@ def run():
                 football.z -= 0.005
                 football.image = pygame.transform.smoothscale(football.image, (50 * football.z,50 * football.z))
             surface.blit(self.image, self.rect)
-            pygame.draw.rect(screen,RED,self.rect)
 
     #Class for keeper
     class Goalkeeper(pygame.sprite.Sprite):
@@ -127,10 +126,6 @@ def run():
         def draw(self, surface=screen):
             surface.blit(self.image_rot, self.rect)
             '''pygame.draw.circle(surface, blue_shade, self.rect_pos, 5)'''
-            #Show the keeper's hitbox
-            rotated_hitbox = pygame.transform.rotate(self.hitbox_surface, self.angle)
-            hitbox_rect = rotated_hitbox.get_rect(center=(self.x, self.y))
-            surface.blit(rotated_hitbox, hitbox_rect)
 
         def rotate_keeper(self,clockwise,ball_at_target):   #Rotation of keeper
             if not ball_at_target:
