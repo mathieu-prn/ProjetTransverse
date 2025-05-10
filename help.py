@@ -55,20 +55,32 @@ def run(game):
                 # self.text: list of tuples each composed of the font to be used and the text to be displayed
                 self.text=[
                     ("h1font", "Goal of the game"),
-                    ("textfont", "The goal is to put the ball in the hole in the fewest shots possible."),
-                    ("textfont", "There are levels of increasing difficulty. Your progression is saved every 5 levels."),
-                    ("textfont", "You have 5 shots maximum to put the ball in the hole. If you don't succeed, you will"),
-                    ("textfont", "be back at the last checkpoint. There are different obstacles. In blue, the walls which block and reflect the ball."),
-                    ("textfont", "In yellow, the bunkers which slow down the ball."),
-                    ("textfont", "Finally, in blue there are the water elements which will reset your ball position if you go in them."),
+                    ("textfont", "  The goal is to put the ball in the hole in the fewest shots possible."),
+                    ("textfont", "  There are levels of increasing difficulty. Your progression is saved every 5 levels."),
+                    ("textfont", "  You have 5 shots maximum to put the ball in the hole. If you don't succeed, you will"),
+                    ("textfont", "  be back at the last checkpoint. There are different obstacles. In blue, the walls which block and reflect the ball."),
+                    ("textfont", "  In yellow, the bunkers which slow down the ball."),
+                    ("textfont", "  Finally, in blue there are the water elements which will reset your ball position if you go in them."),
                     ("h1font", "Controls"),
-                    ("textfont", "You can change the ball's direction by moving your mouse around. You can see in which direction the ball will go"),
-                    ("textfont", "thanks to the arrow. You can lock its direction by clicking. You can unlock it by clicking on the field again."),
-                    ("textfont", "You can adjust the force of the shot with the slider on the left."),
-                    ("textfont", "When you are ready, click on the \"Go!\" button to shoot the ball!")
+                    ("textfont", "  You can change the ball's direction by moving your mouse around. You can see in which direction the ball will go"),
+                    ("textfont", "  thanks to the arrow. You can lock its direction by clicking. You can unlock it by clicking on the field again."),
+                    ("textfont", "  You can adjust the force of the shot with the slider on the left."),
+                    ("textfont", "  When you are ready, click on the \"Go!\" button to shoot the ball!")
                     ]
             elif game=="Basket":
-                self.text=[("textfont","nothing")]
+                self.text=[
+                    ("h1font", "WARNING"),
+                    ("textfont", "   This is a 2 players game"),
+                    ("h1font", "Goal of the game"),
+                    ("textfont","   The goal is to score more points than your opponent by making basket with the fewest bounces possible."),
+                    ("textfont","   There are 4 levels of increasing difficulty. The points are awarded immediately after you make a basket, and"),
+                    ("textfont","   then the shot is given to your opponent. There are obstacles in the levels, they are blue walls that will block"),
+                    ("textfont","   and reflect the ball."),
+                    ("textfont","   The winner of the game is the player with the most points."),
+                    ("h1font", "Controls"),
+                    ("textfont","   You can change the ball's direction by moving your mouse around. You can see in which direction the ball will go"),
+                    ("textfont","   thanks to the arrow. You can lock its direction by clicking. You can unlock it by clicking on the field again."),
+                    ("textfont","   The force of the shot is random, so when you are ready, click on the \"Go!\" button to shoot the ball!")]
             elif game=="Penalty":
                 self.text=[("textfont","nothing")]
         def draw(self):
