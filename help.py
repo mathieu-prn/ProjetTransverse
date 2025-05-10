@@ -82,7 +82,16 @@ def run(game):
                     ("textfont","   thanks to the arrow. You can lock its direction by clicking. You can unlock it by clicking on the field again."),
                     ("textfont","   The force of the shot is random, so when you are ready, click on the \"Go!\" button to shoot the ball!")]
             elif game=="Penalty":
-                self.text=[("textfont","nothing")]
+                self.text=[
+                    ("h1font", "Goal of the game"),
+                    ("textfont", "  The goal is to beat the goalkeeper in a penalty session."),
+                    ("textfont", "  There are 3 different levels of difficulty, from Easy to Hard."),
+                    ("textfont", "  With each level of difficulty, the speed of the goalkeeper and the dispersion of the ball will increase."),
+                    ("h1font", "Controls"),
+                    ("textfont", " You can first lock the force of the shot, therefore its precision, by trying to press the screen when the circle"),
+                    ("textfont", " is the smallest. Once you chose its force, you can choose where you shoot the ball by clicking on a spot in the net."),
+                    ("textfont", " If you're lucky enough, the ball should go in the net without touching the goalkeeper and you'll win!"),
+                    ("textfont", " Else, you've got beaten...")]
         def draw(self):
             """Draw the text and handle the blit destination."""
             for tuple in self.text: # For each line
