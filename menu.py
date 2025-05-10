@@ -23,6 +23,7 @@ FONT = pygame.font.Font(config.FONT, 48) # Main FONT
 soundeffect_clicked=pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
 pygame.mixer.music.load("assets/Common/Sounds/music.mp3")
 pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.5)
 
 class SettingsButton(pygame.sprite.Sprite):
     def __init__(self):

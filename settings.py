@@ -1,5 +1,6 @@
 from utility import *
 import config
+import help as help
 
 # Load images only once
 IMAGE_CACHE = {}
@@ -91,7 +92,11 @@ def run():
             pygame.draw.rect(SCREEN, (255, 255, 255), self.button_rect.inflate(-8,-8), border_radius=44)
             SCREEN.blit(self.text, (self.text_rect.center[0]-self.text_rect.width/2, self.text_rect.center[1]-self.text_rect.height/2))
         def clicked(self):
-            pass
+            if self.button_rect.collidepoint(pygame.mouse.get_pos()):
+                soundeffect_clicked.play()
+                if help.run() == "Exit": #Run the help.py file and handle the exit
+                    pygame.event.clear()
+                    print("cleared events")
 
 
 
@@ -110,8 +115,9 @@ def run():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN: #all events if mouse is pressed
                 stoggle.clicked()
+                hbutton.clicked()
                 if backarrow.clicked(): #Back to the menu when the back arrow is clicked
                     return "Exit"
             if event.type == pygame.KEYDOWN:
