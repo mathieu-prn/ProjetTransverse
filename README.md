@@ -6,6 +6,8 @@
 - **Basket**: Through four levels, challenge yourself and a friend in a competitive shooting contest! Be precise, the more you bounce, the less you win... 
 - **Penalty**: Try and beat the keeper on this Penalty game! With 3 levels of difficulty, challenge the keeper to a 1v1 where you can show your football talents!
 
+---
+
 ## 📦 Features
 
 - 🎮 Multiple Mini-Games:
@@ -16,6 +18,8 @@
 - 🔊 Integrated Sound Effects and Background Music
 - ⚙️ Settings Menu
 - 💾 Game Preview and Placeholder for Leaderboards
+
+---
 
 ## ⛳ The golf game
 ### 🎯 The goal of the game
@@ -35,6 +39,8 @@
 - You can adjust the force of the shot with the slider on the left.
 - When you are ready, click on the **\"Go!\"** button to shoot the ball!
 
+---
+
 ## 🏀 The basket game
 
 ### ⚠️  2-Player Game Only
@@ -51,6 +57,8 @@
 - You can lock its direction by clicking. You can unlock it by clicking on the field again.
 - The force of the shot is random, so when you are ready, click on the **\"Go!\"** button to shoot the ball!
 
+---
+
 ## ⚽ Penalty
 ### 🎯 The goal of the game
 
@@ -64,17 +72,17 @@
 - If you're lucky enough, the ball should go in the net without touching the goalkeeper and you'll win!
 - Else, you've got beaten...
 
+---
 
+# 👥 Creation team
 
+- Astrid BAERT
+- Benjamin BENTZE 
+- Théo KÖNIG
+- Mathieu PRINCE
+- Florian RIBRIOUX
 
-
-
-
-
-
-
-
-
+---
 
 # 🧑‍💻 Tech Stack
 
@@ -82,7 +90,9 @@
 - **Library:** [Pygame](https://www.pygame.org/)
 - **Assets:** Custom images, sounds, and fonts in the `assets/` directory
 
-## 🚀 Getting Started
+---
+
+## 🚀 Play by yourself
 
 ### Prerequisites
 
