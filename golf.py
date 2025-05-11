@@ -157,7 +157,7 @@ def run():
             return False
 
         def unstuck(self):
-            """Avoid as mush as possible getting the ball stucked in a wall"""
+            """Prevent the ball from going out of the field by pushing it back inside."""
             if self.rect.left < field.rect.left:
                 self.rect.center = (self.rect.center[0] + 4, self.rect.center[1])
             elif self.rect.right > field.rect.right:
