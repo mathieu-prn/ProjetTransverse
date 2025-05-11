@@ -21,7 +21,7 @@
 
 ---
 
-## ⛳ The golf game
+## ⛳ Golf
 ### 🎯 The goal of the game
 
 - The goal is to put the ball in the hole in the fewest shots possible. 
@@ -41,7 +41,7 @@
 
 ---
 
-## 🏀 The basket game
+## 🏀 Basket
 
 ### ⚠️  2-Player Game Only
 
