@@ -277,6 +277,7 @@ def run():
             #Verify if player pressed the escape key to go back to game selection
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    locked = False
                     return "Exit"
 
 
