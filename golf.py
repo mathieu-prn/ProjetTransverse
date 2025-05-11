@@ -63,10 +63,11 @@ def run():
         """Update the score of the current level only if it is better than the one already saved"""
         filename = "saves/golflevel.json"
         dico = loadfile(filename)
-        if score > dico[str(levelnumber)]:
-            dico[str(levelnumber)] = score
-        with open(filename, "w") as file:
-            json.dump(dico, file)
+        if 0<=levelnumber<=14:
+            if score>dico[str(levelnumber)]:
+                dico[str(levelnumber)] = score
+                with open(filename, "w") as file:
+                    json.dump(dico, file)
 
     def end_level():
         """Reset game state for a new level."""
@@ -83,6 +84,18 @@ def run():
         WON = False
         message.draw("lose")
         end_level()
+
+    def go_to_next_level(): # Handle the loading of the next level when the player wins
+        updatescore(game_state.level.number, score.score) # Update the score in the save file
+
+        new_level = game_state.level.number + 1 # Update the level number
+        if new_level % 5 == 0:  # Save every 5 levels
+            updatelevel(new_level)
+        game_state.level.number = new_level #assign the new level number to the game state
+        end_level() # end the current level
+        game_state.level = Level(game_state.level.number) # load the new level
+
+
 
     # Render Static Background
     def render_static_background(level):
@@ -532,21 +545,55 @@ def run():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.button_rect.collidepoint(event.pos):
                     soundeffect_clicked.play()
+                    self.button_color = config.GREY
                     if WON:  # Player won
-                        self.button_color = config.GREY
-                        updatescore(game_state.level.number, score.score)
-                        new_level = game_state.level.number + 1
-                        print(new_level)
-                        if new_level % 5 == 0:  # Save every 5 levels
-                            updatelevel(new_level)
-                        game_state.level.number = new_level
-                        end_level()
-                        game_state.level = Level(game_state.level.number)
+                        go_to_next_level()
                     else:  # Player lost
                         end_level()
                         game_state.level.number = getlevel()  # Reload the checkpoint (saved level)
                         game_state.level = Level(game_state.level.number)
                     game_state.static_background = render_static_background(game_state.level)
+                    DISPLAY_MSG = False  # Make the message disappear
+
+    class WinMessage(pygame.sprite.Sprite):
+        """Message displayed when all the levels are completed."""
+        def __init__(self):
+            super().__init__()
+            self.font = get_font(28)
+            self.fontcolor = config.BLUE_EFREI
+            self.button_width, self.button_height = 150, 50  # Dimensions of the confirm button
+            self.button_pos = (500 - self.button_width / 2, 275)
+            self.button_color = config.WHITE
+            self.button_rect = pygame.Rect(self.button_pos, (self.button_width, self.button_height))
+
+        def draw(self, surface=SCREEN):
+            """Prepares the text renders for the message and button and draw them."""
+            msg = "You successfully completed all the levels! Congratulations!"
+            button_msg = "Ok"
+
+            # Draw
+            text = self.font.render(msg, True, config.BLACK)
+            text_width, text_height = text.get_size()
+            surface.blit(text, (surface.get_width() / 2 - text_width / 2, surface.get_height() / 2 - text_height / 2))
+            pygame.draw.rect(surface, config.BLACK, self.button_rect.inflate(6, 6))
+            pygame.draw.rect(surface, self.button_color, self.button_rect)
+
+            button_text = self.font.render(button_msg, True, config.BLACK)
+
+            # Below is to center the text in the button
+            tbutton_width, tbutton_height = button_text.get_size()
+            tbuttonx = self.button_pos[0] + ((self.button_width - tbutton_width) / 2)
+            tbuttony = self.button_pos[1] + ((self.button_height - tbutton_height) / 2)
+            surface.blit(button_text, (tbuttonx, tbuttony))  # Draw the text
+
+        def clicked(self, event):
+            """Handles clicks on the message button."""
+            global DISPLAY_MSG # allow to modify the global variable
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.button_rect.collidepoint(event.pos):
+                    soundeffect_clicked.play()
+                    self.button_color = config.GREY
+                    end_level()
                     DISPLAY_MSG = False  # Make the message disappear
 
     class Resetbutton(pygame.sprite.Sprite):
@@ -605,8 +652,9 @@ def run():
     arrow = Arrow()  # The arrow
     score = Score()  # The score, shots counter and display for them
     message = Message()  # The win/lose message
-    game_state = GameState(Level(getlevel()))  # General game state, initalized with the saved level
+    game_state = GameState(Level(getlevel()))  # General game state, initialized with the saved level
     resetbutton = Resetbutton()  # The button to reset to the checkpoint
+    winmessage = WinMessage() # Message displayed when all levels are completed
 
     # Define sound effects
     soundeffect_hole = pygame.mixer.Sound("assets/Golf/Sounds/hole.mp3")
@@ -637,8 +685,11 @@ def run():
             if event.type == pygame.QUIT:
                 running = False
 
-            if DISPLAY_MSG:  # If a win/lose message is active
-                message.clicked(event)
+            if DISPLAY_MSG: # If a win/lose message is active
+                if game_state.level.number==14:
+                    winmessage.clicked(event)
+                else:
+                    message.clicked(event)
 
             else:  # Normal gameplay event handling
                 slider.handle_event(event)  # Event handling for slider
@@ -663,23 +714,28 @@ def run():
                         return "Exit"
 
                     keys = pygame.key.get_pressed()  # For shortcuts (multiple keys pressed at the time)
+
                     # Cheats
                     if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and (
                             keys[pygame.K_KP_PLUS] or keys[pygame.K_KP_MINUS] or keys[pygame.K_KP_DIVIDE]):
                         if keys[pygame.K_KP_PLUS]:  # jump to next level with LCTRL+LALT+"+"
-                            newlvl = game_state.level.number + 1
+                            newlvl = (game_state.level.number + 1)
                         elif keys[pygame.K_KP_MINUS]:  # jump to previous level with LCTRL+LALT+"-"
                             newlvl = game_state.level.number - 1
                         elif keys[pygame.K_KP_DIVIDE]:  # reset level number to 0 with LCTRL+LALT+"/"
                             newlvl = 0
-                        end_level()  # Reset level
+                        else: # Handle error
+                            newlvl=game_state.level.number
 
-                        # Load the new level newlvl
-                        game_state.level.number = newlvl
-                        game_state.level = Level(game_state.level.number)
-                        game_state.static_background = render_static_background(game_state.level)
+                        if 0<=newlvl<=14: # Ensure you don't load a level that doesn't exist.
+                            end_level()  # Reset level
 
-                        print("gamestate loaded with level" + str(game_state.level.number))
+                            # Load the new level newlvl
+                            game_state.level.number = newlvl
+                            game_state.level = Level(game_state.level.number)
+                            game_state.static_background = render_static_background(game_state.level)
+
+                            print("gamestate loaded with level" + str(game_state.level.number))
 
         # Game logic
         # Blit the static background
@@ -689,7 +745,9 @@ def run():
             game_state.level.flag.draw(SCREEN)
 
         if DISPLAY_MSG:  # If a win/lose message is active
-            if WON:
+            if WON and game_state.level.number == 14:
+                winmessage.draw(SCREEN)
+            elif WON:
                 message.draw("win")  # Draw the win message
             else:
                 message.draw("lose")  # Draw the loss message
@@ -707,8 +765,7 @@ def run():
             ball.unstuck()  # Avoid getting the ball stucked somewhere
             ball.update_position(False)  # Update ball's position (False because it's not being launched)
 
-            if game_state.level.hole.collision_rect.colliderect(
-                    ball.rect) and ball.velocity < 10:  # Win condition --> If the ball collides with the colliderect of the hole and it isn't too fast
+            if game_state.level.hole.collision_rect.colliderect(ball.rect) and ball.velocity < 10:  # Win condition --> If the ball collides with the colliderect of the hole and it isn't too fast
                 soundeffect_hole.play()
                 WON = True  # Player Won
                 DISPLAY_MSG = True  # Display the message
