@@ -1,3 +1,5 @@
+"""This file contains some functions used in a lot of files."""
+
 import json, pygame, config
 
 def getrelativepos(pos):
@@ -10,6 +12,7 @@ def loadfile(file):
     return json.load(open(file))
 
 def get_font(size): # Returns a pygame font of size "size"
+    """Returns a pygame font of size 'size'."""
     return pygame.font.Font(config.FONT, size)
 
 

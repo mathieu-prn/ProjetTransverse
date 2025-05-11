@@ -37,10 +37,6 @@ def run():
 
     # Level Handling Functions
 
-    def get_font(size):
-        """Returns a pygame font of size 'size'."""
-        return pygame.font.Font(config.FONT, size)
-
     def getlevel():
         """Read and return the level number from the save file."""
         filename = "saves/golflevel.json"

@@ -1,6 +1,6 @@
 from utility import *
 import config
-import help as help
+from utility import get_font
 
 # Load images only once
 IMAGE_CACHE = {}

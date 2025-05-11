@@ -12,7 +12,7 @@ def load_image(path):
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
 def run(game):
-    print("Help :",str(game),"is running")
+    """Main function, called in game_select.py"""
 
     # Sounds
     soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
@@ -23,11 +23,9 @@ def run(game):
     else:
         soundeffect_clicked.set_volume(0)
 
-    def get_font(size): # Returns a pygame font of size "size"
-        return pygame.font.Font(config.FONT, size)
-
     #Class
     class BackArrow(pygame.sprite.Sprite):
+        """Class of the arrow to get back to game_select.py"""
         def __init__(self):
             super().__init__()
             self.back_button = pygame.transform.scale(load_image("assets/Menu/arrow.png"), (40, 40))
@@ -59,7 +57,7 @@ def run(game):
             self.textfont= get_font(17)
             self.blit_dest = [30,75] # The destination to blit the next chunk of text
             if game=="Golf":
-                # self.text: list of tuples each composed of the font to be used and the text to be displayed
+                # self.text: list of tuples each composed of the font to be used and the text to be displayed.
                 self.text=[
                     ("h1font", "Goal of the game"),
                     ("textfont", "   The goal is to put the ball in the hole in the fewest shots possible."),
