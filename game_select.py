@@ -20,9 +20,7 @@ def round_image_corners(image, radius):
     return rounded_image
 
 def run(FONT,BG): #Main function, called in the menu (main.py)
-    play_button = pygame.image.load("assets/Common/play_button.png")
-    help_button_image = pygame.transform.scale(pygame.image.load("assets/Common/help_button.png"),(100,100))  # help button
-    #previews
+    # Previews assets
     golf_preview = pygame.transform.scale(pygame.image.load("assets/Menu/golf_preview.png"),(530,298))
     basket_preview = pygame.transform.scale(pygame.image.load("assets/Menu/basket_preview.png"),(530,298))
     penalty_preview = pygame.transform.scale(pygame.image.load("assets/Menu/penalty_preview.png"),(530,298))
@@ -35,7 +33,7 @@ def run(FONT,BG): #Main function, called in the menu (main.py)
 
     GREY = (234, 234, 234) #different grey from the one in config.py
 
-    class button():
+    class Button():
         def __init__(self,name):
             self.name = name
             if self.name =="Basket":
@@ -54,21 +52,38 @@ def run(FONT,BG): #Main function, called in the menu (main.py)
             SCREEN.blit(text_surface, text_rect)
 
 
-    class Play_button():
+    class PlayButton():
         def __init__(self):
-            self.rect = pygame.Rect(772, 332, 160, 160)
+            self.borderrect = pygame.Rect(772, 332, 160, 160)
+            self.button_rect = pygame.Rect(774, 334, 156, 156)
+            self.play_button_img = pygame.image.load("assets/Common/play_button.png")
+        def draw(self):
+            pygame.draw.rect(SCREEN, config.BLUE_EFREI, self.borderrect, border_radius=24)
+            pygame.draw.rect(SCREEN, GREY, self.button_rect, border_radius=24)
+            SCREEN.blit(self.play_button_img, (824, 376))
+        def clicked(self,game):
+            if self.button_rect.collidepoint(pygame.mouse.get_pos()):
+                soundeffect_clicked.play()
+                if game == "Golf":
+                    if golf.run() == "Exit":
+                        pygame.event.clear()
+                if game == "Basket":
+                    if basket.run() == "Exit":
+                        pygame.event.clear()
+                if game == "Penalty":
+                    if penalty.run() == "Exit":
+                        pygame.event.clear()
 
-    play_rect = pygame.Rect(772, 332, 160, 160)
-
-    class Help_button():
+    class HelpButton():
         def __init__(self):
             super().__init__()
             self.borderrect = pygame.rect.Rect(398, 332, 160, 160)
             self.rect = pygame.rect.Rect(400, 334, 156, 156)
+            self.help_button_image = pygame.transform.scale(pygame.image.load("assets/Common/help_button.png"),(100,100))  # help button
         def draw(self):
             pygame.draw.rect(SCREEN, config.BLUE_EFREI, self.borderrect, border_radius=24)
             pygame.draw.rect(SCREEN, GREY, self.rect, border_radius=24)
-            SCREEN.blit(help_button_image, (430, 365))
+            SCREEN.blit(self.help_button_image, (430, 365))
         def clicked(self,game):
             if self.rect.collidepoint(pygame.mouse.get_pos()): # If the click was on the button
                 soundeffect_clicked.play()
@@ -85,12 +100,13 @@ def run(FONT,BG): #Main function, called in the menu (main.py)
 
 
     #Define game objects
-    help_button = Help_button()
+    help_button = HelpButton()
+    play_button = PlayButton()
 
-    basket_b = button("Basket")
-    penalty_b = button("Penalty")
-    golf_b = button("Golf")
-    exit_b = button("Exit")
+    basket_b = Button("Basket")
+    penalty_b = Button("Penalty")
+    golf_b = Button("Golf")
+    exit_b = Button("Exit")
     game_buttons=[basket_b,penalty_b,golf_b,exit_b]
 
     clock = pygame.time.Clock()
@@ -103,6 +119,7 @@ def run(FONT,BG): #Main function, called in the menu (main.py)
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 help_button.clicked(game)
+                play_button.clicked(game)
                 mouse_pos = event.pos
                 for button in game_buttons:
                     if button.rect.collidepoint(mouse_pos):
@@ -117,17 +134,6 @@ def run(FONT,BG): #Main function, called in the menu (main.py)
                             preview="basket"
                         elif game=="Exit":
                             return "Exit"
-                if play_rect.collidepoint(mouse_pos):
-                    soundeffect_clicked.play()
-                    if game=="Golf":
-                        if golf.run()=="Exit":
-                            pygame.event.clear()
-                    if game=="Basket":
-                        if basket.run()=="Exit":
-                            pygame.event.clear()
-                    if game=="Penalty":
-                        if penalty.run() == "Exit":
-                            pygame.event.clear()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE: #Back to the menu when escape is pressed
                     return "Exit"
@@ -155,13 +161,10 @@ def run(FONT,BG): #Main function, called in the menu (main.py)
                 im_preview=round_image_corners(penalty_preview,24)
             SCREEN.blit(im_preview, (400, 18))
 
-        # Historic button
+        # Play and help buttons
         help_button.draw()
+        play_button.draw()
 
-        # Play button
-        pygame.draw.rect(SCREEN, config.BLUE_EFREI, (772, 332, 160, 160), border_radius=24)
-        pygame.draw.rect(SCREEN, GREY, (774, 334, 156, 156), border_radius=24)
-        SCREEN.blit(play_button, (824, 376))
 
         pygame.display.flip()
         clock.tick(60)
