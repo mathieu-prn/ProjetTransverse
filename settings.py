@@ -16,6 +16,7 @@ TOGGLESTATE=True
 
 #Sounds and files
 soundeffect_clicked=pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
+soundeffect_clicked.set_volume(0.5)
 
 def run():
     global TOGGLESTATE

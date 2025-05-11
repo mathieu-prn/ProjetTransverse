@@ -19,7 +19,7 @@ def round_image_corners(image, radius):
 
     return rounded_image
 
-def run(FONT,BG): #Main function, called in the menu (menu.py)
+def run(FONT,BG): #Main function, called in the menu (main.py)
     play_button = pygame.image.load("assets/Common/play_button.png")
     help_button_image = pygame.transform.scale(pygame.image.load("assets/Common/help_button.png"),(100,100))  # help button
     #previews
@@ -31,6 +31,7 @@ def run(FONT,BG): #Main function, called in the menu (menu.py)
     preview=None
 
     soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
+    soundeffect_clicked.set_volume(0.5)
 
     GREY = (234, 234, 234) #different grey from the one in config.py
 

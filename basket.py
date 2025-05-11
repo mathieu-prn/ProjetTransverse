@@ -39,6 +39,8 @@ soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
 soundeffect_bounce = pygame.mixer.Sound("assets/Basket/Sounds/bounce.mp3")
 soundeffect_inthebasket = pygame.mixer.Sound("assets/Basket/Sounds/inthebasket.mp3")
 
+soundeffect_clicked.set_volume(0.5)
+
 clock = pygame.time.Clock()
 
 def run(): # Main function, called in the menu (game_select.py)

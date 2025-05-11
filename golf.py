@@ -615,6 +615,7 @@ def run():
     soundeffect_water = pygame.mixer.Sound("assets/Golf/Sounds/water.mp3")
     soundeffect_save = pygame.mixer.Sound("assets/Golf/Sounds/save.mp3")
     soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
+    soundeffect_clicked.set_volume(0.5)
 
     clock = pygame.time.Clock()
     running = True

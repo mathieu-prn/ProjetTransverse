@@ -35,6 +35,8 @@ soundeffect_net = pygame.mixer.Sound("assets/Football/Sounds/net.mp3")
 soundeffect_cheer = pygame.mixer.Sound("assets/Football/Sounds/cheers.mp3")
 soundeffect_lose = pygame.mixer.Sound("assets/Football/Sounds/awww.mp3")
 
+soundeffect_clicked.set_volume(0.5)
+
 # Boolean for loss
 game_over_lose = False
 
