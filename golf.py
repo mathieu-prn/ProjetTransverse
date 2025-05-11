@@ -615,7 +615,17 @@ def run():
     soundeffect_water = pygame.mixer.Sound("assets/Golf/Sounds/water.mp3")
     soundeffect_save = pygame.mixer.Sound("assets/Golf/Sounds/save.mp3")
     soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
-    soundeffect_clicked.set_volume(0.5)
+
+    # Handle the sound effects enabled or disabled
+    if config.TOGGLESTATE_SOUND:
+        soundeffect_clicked.set_volume(0.5)
+    else:
+        soundeffect_clicked.set_volume(0)
+        soundeffect_save.set_volume(0)
+        soundeffect_water.set_volume(0)
+        soundeffect_swing.set_volume(0)
+        soundeffect_collisions.set_volume(0)
+        soundeffect_hole.set_volume(0)
 
     clock = pygame.time.Clock()
     running = True

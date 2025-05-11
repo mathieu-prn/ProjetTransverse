@@ -27,16 +27,6 @@ GREEN = (148, 186, 134)
 BUNKER_YELLOW = (237, 225, 141)
 WATER_BLUE = (0, 167, 250)
 
-#Initialize sounds
-soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
-soundeffect_kick = pygame.mixer.Sound("assets/Football/Sounds/ball_kicked.mp3")
-soudeffect_hit = pygame.mixer.Sound("assets/Football/Sounds/validate_force.mp3")
-soundeffect_net = pygame.mixer.Sound("assets/Football/Sounds/net.mp3")
-soundeffect_cheer = pygame.mixer.Sound("assets/Football/Sounds/cheers.mp3")
-soundeffect_lose = pygame.mixer.Sound("assets/Football/Sounds/awww.mp3")
-
-soundeffect_clicked.set_volume(0.5)
-
 # Boolean for loss
 game_over_lose = False
 
@@ -62,6 +52,25 @@ def run():
     #Global Setup
     global game_over_lose,game_over_win, clockwise,number_target,ball_at_target,locked
     pygame.display.set_caption("EfreiSport - Penalty")
+
+    # Initialize sounds
+    soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
+    soundeffect_kick = pygame.mixer.Sound("assets/Football/Sounds/ball_kicked.mp3")
+    soundeffect_hit = pygame.mixer.Sound("assets/Football/Sounds/validate_force.mp3")
+    soundeffect_net = pygame.mixer.Sound("assets/Football/Sounds/net.mp3")
+    soundeffect_cheer = pygame.mixer.Sound("assets/Football/Sounds/cheers.mp3")
+    soundeffect_lose = pygame.mixer.Sound("assets/Football/Sounds/awww.mp3")
+
+    # Handle the sound effects enabled or disabled
+    if config.TOGGLESTATE_SOUND:
+        soundeffect_clicked.set_volume(0.5)
+    else:
+        soundeffect_clicked.set_volume(0)
+        soundeffect_kick.set_volume(0)
+        soundeffect_net.set_volume(0)
+        soundeffect_cheer.set_volume(0)
+        soundeffect_lose.set_volume(0)
+        soundeffect_hit.set_volume(0)
 
     #Class for football
     class Ball(pygame.sprite.Sprite):
@@ -255,7 +264,7 @@ def run():
                             reset_game()
                     #If player locked ball's precision
                     elif target.x == football.x and target.y == football.y and number_target == 0 and not locked:
-                        soudeffect_hit.play()
+                        soundeffect_hit.play()
                         locked = True
                     #If player locked ball's target
                     elif target.x == football.x and target.y == football.y and number_target == 0:

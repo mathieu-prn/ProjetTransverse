@@ -11,12 +11,18 @@ def load_image(path):
 # ---- Initialize global variables
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
-#Sounds and files
-soundeffect_clicked=pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
-soundeffect_clicked.set_volume(0.5)
-
 def run(game):
     print("Help :",str(game),"is running")
+
+    # Sounds
+    soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
+
+    # Handle the sound effects enabled or disabled
+    if config.TOGGLESTATE_SOUND:
+        soundeffect_clicked.set_volume(0.5)
+    else:
+        soundeffect_clicked.set_volume(0)
+
     def get_font(size): # Returns a pygame font of size "size"
         return pygame.font.Font(config.FONT, size)
 

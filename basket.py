@@ -19,16 +19,22 @@ dt = 1/10
 PI = math.pi
 BOUNCE_COEFF = 0.7
 
-#Initialize sounds
-soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
-soundeffect_bounce = pygame.mixer.Sound("assets/Basket/Sounds/bounce.mp3")
-soundeffect_inthebasket = pygame.mixer.Sound("assets/Basket/Sounds/inthebasket.mp3")
-
-soundeffect_clicked.set_volume(0.5)
-
 clock = pygame.time.Clock()
 
 def run(): # Main function, called in the menu (game_select.py)
+
+    # Initialize sounds
+    soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
+    soundeffect_bounce = pygame.mixer.Sound("assets/Basket/Sounds/bounce.mp3")
+    soundeffect_inthebasket = pygame.mixer.Sound("assets/Basket/Sounds/inthebasket.mp3")
+
+    # Handle the sound effects enabled or disabled
+    if config.TOGGLESTATE_SOUND:
+        soundeffect_clicked.set_volume(0.5)
+    else:
+        soundeffect_inthebasket.set_volume(0)
+        soundeffect_bounce.set_volume(0)
+        soundeffect_clicked.set_volume(0)
 
     ########## CLASSES DEFINITION ##########
 

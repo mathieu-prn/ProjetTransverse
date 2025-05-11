@@ -3,6 +3,7 @@ WIDTH = 1000
 HEIGHT = 500
 BG = "assets/Common/Background.png"
 FONT = "assets/Common/FONT.ttf"
+TOGGLESTATE_SOUND=True
 
 # ----- colors
 BLUE_EFREI = (18,121,190)

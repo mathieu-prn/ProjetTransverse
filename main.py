@@ -23,8 +23,6 @@ FONT = pygame.font.Font(config.FONT, 48) # Main FONT
 soundeffect_clicked=pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
 pygame.mixer.music.load("assets/Common/Sounds/music.mp3")
 pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0.5)
-soundeffect_clicked.set_volume(0.5)
 
 class SettingsButton(pygame.sprite.Sprite):
     def __init__(self):
@@ -54,6 +52,12 @@ clock = pygame.time.Clock()
 # Game loop
 running = True
 while running:
+    # Handle the sound effects enabled or disabled
+    if config.TOGGLESTATE_SOUND:
+        soundeffect_clicked.set_volume(0.5)
+    else:
+        soundeffect_clicked.set_volume(0)
+
     pygame.display.set_caption("EfreiSport - Menu")  # Title
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

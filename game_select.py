@@ -1,5 +1,5 @@
 
-import pygame, config, golf as golf, basket as basket, peno_fonc as penalty, help as help
+import pygame, config, golf as golf, basket as basket, penalty as penalty, help as help
 
 SCREEN = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
 
@@ -29,7 +29,12 @@ def run(FONT,BG): #Main function, called in the menu (main.py)
     preview=None
 
     soundeffect_clicked = pygame.mixer.Sound("assets/Common/Sounds/clicked.mp3")
-    soundeffect_clicked.set_volume(0.5)
+
+    # Handle the sound effects enabled or disabled
+    if config.TOGGLESTATE_SOUND:
+        soundeffect_clicked.set_volume(0.5)
+    else:
+        soundeffect_clicked.set_volume(0)
 
     GREY = (234, 234, 234) #different grey from the one in config.py
 
